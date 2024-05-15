@@ -1,4 +1,5 @@
 type Petition = {
+
     petitionId: number,
     title: string,
     categoryId: number,
