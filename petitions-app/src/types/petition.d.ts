@@ -1,4 +1,4 @@
-type Petitions = {
+type Petition = {
 
     petitionId: number,
     title: string,
@@ -8,5 +8,7 @@ type Petitions = {
     ownerLastName: string,
     numberOfSupporters: number,
     creationDate: Date,
-    supportingCost: number
+    description: string,
+    moneyRaised: number,
+    supportTiers: SupportTier[]
 }

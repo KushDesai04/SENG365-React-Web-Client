@@ -13,9 +13,10 @@ import {
     Paper,
     Select,
     SelectChangeEvent,
-    TextField
+    TextField,
+    Checkbox
 } from "@mui/material";
-import PetitionListObject from "./PetitionListObject"
+import PetitionCard from "./PetitionCard"
 import SearchIcon from '@mui/icons-material/Search';
 import {Category} from "@mui/icons-material";
 
@@ -33,7 +34,7 @@ const SortOptions = [{
     value: 'ALPHABETICAL_DESC', label: 'A-Z Descending'
 }]
 const PetitionList = () => {
-    const [petitions, setPetitions] = React.useState<Array<Petition>>([])
+    const [petitions, setPetitions] = React.useState<Array<Petitions>>([])
     const [errorFlag, setErrorFlag] = React.useState(false)
     const [errorMessage, setErrorMessage] = React.useState("")
     const [infoFlag, setInfoFlag] = React.useState(false)
@@ -43,8 +44,6 @@ const PetitionList = () => {
     const [petitionQuery, setPetitionQuery] = React.useState("")
     const [editPetitionQuery, setEditPetitionQuery] = React.useState("")
     const [petitionSupportingCost, setPetitionSupportingCost] = React.useState<string>("")
-    const [petitionOwnerId, setPetitionOwnerId] = React.useState<number>(0)
-    const [petitionSupporterId, setPetitionSupporterId] = React.useState<number>(0)
     const [petitionSort, setPetitionSort] = React.useState<string>("CREATED_ASC")
     const [categories, setCategories] = React.useState<Array<Category>>([])
     const [petitionCategory, setPetitionCategory] = React.useState<string[]>([]);
@@ -73,7 +72,7 @@ const PetitionList = () => {
 
     React.useEffect(() => {
         const getPetitions = () => {
-            axios.get('https://seng365.csse.canterbury.ac.nz/api/v1/petitions?' + filter)
+            axios.get('http://localhost:4941/api/v1/petitions?' + filter)
                 .then((response) => {
                     setErrorFlag(false)
                     setErrorMessage("")
@@ -93,7 +92,7 @@ const PetitionList = () => {
         }
 
         const getCategories = () => {
-            axios.get('https://seng365.csse.canterbury.ac.nz/api/v1/petitions/categories')
+            axios.get('http://localhost:4941/api/v1/petitions/categories')
                 .then((response) => {
                     setCategories(response.data)
                 }, (error) => {
@@ -122,20 +121,16 @@ const PetitionList = () => {
     }
 
     const changeCategory = (event: SelectChangeEvent<typeof petitionCategory>) => {
-        const {
-            target: {value},
-        } = event;
+        const { target: {value}, } = event;
         setPetitionCategory(typeof value === 'string' ? value.split(',') : value,);
     }
 
     const changeSort = (event: SelectChangeEvent<typeof petitionSort>) => {
-        const {
-            target: {value},
-        } = event;
+        const { target: {value}, } = event;
         setPetitionSort(value)
     }
 
-    const petition_rows = () => petitions.map((petition: Petition) => <PetitionListObject
+    const petition_rows = () => petitions.map((petition: Petitions) => <PetitionCard
         key={petition.petitionId + petition.title} petition={petition}
     />)
     const card: CSS.Properties = {
@@ -172,7 +167,6 @@ const PetitionList = () => {
                                 value={petitionCategory}
                                 onChange={changeCategory}
                                 input={<OutlinedInput label="Category"/>}
-                                // MenuProps={Categories}
                             >
                                 {categories.map((category) => (<MenuItem
                                     key={category.categoryId}
