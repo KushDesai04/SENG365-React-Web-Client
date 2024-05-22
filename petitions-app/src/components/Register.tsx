@@ -39,7 +39,6 @@ const Register = () => {
                 setUserId(userId)
                 navigate('/login')
             }, (error) => {
-                setErrorFlag(true)
                 const errorMessage = error.response.statusText.split('/')[1]
                 const errorType = error.response.status
                 setFirstNameError(false)
