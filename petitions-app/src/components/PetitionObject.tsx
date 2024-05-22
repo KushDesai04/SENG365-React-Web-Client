@@ -19,7 +19,7 @@ import {
     CardMedia,
     Typography,
 } from "@mui/material";
-import PetitionListObject from "./PetitionCard"
+import PetitionCard from "./PetitionCard"
 import { request } from 'http';
 import { useParams } from 'react-router-dom';
 import SupportTierCard from './SupportTierCard';
@@ -42,7 +42,7 @@ const PetitionObject = () => {
                     setErrorFlag(false)
                     setErrorMessage("")
                     setPetition(response.data)
-                    setPetitionToDisplay(<PetitionListObject key={response.data.petitionId + response.data.title} petition={response.data}/>)
+                    setPetitionToDisplay(<PetitionCard key={response.data.petitionId + response.data.title} petition={response.data}/>)
                     if (response.data.count === 0) {
                         setInfoFlag(true)
                         setInfoMessage("No petitions found")
@@ -88,11 +88,11 @@ const PetitionObject = () => {
     }
     return (<>
 
-            <Paper elevation={2} style={card}>
+            <Paper elevation={1} style={card}>
                 <Button variant="contained" color="primary" href="/petitions">Back</Button>
             </Paper>
 
-            <Paper elevation={3} style={card}>
+            <Paper elevation={1} style={card}>
                 <h1>Petition</h1>
                     <div style={{display: "inline-block", width: "100%"}}>
                         {errorFlag ? <Alert severity="error" style={{display: "flex", justifyContent: "center"}}>
@@ -105,7 +105,7 @@ const PetitionObject = () => {
                         {petitionToDisplay}
                     </div>
             </Paper>
-            <Paper elevation={4} style={card}>
+            <Paper elevation={3} style={card}>
                 <h1>Supporters</h1>
                 {petition_support()}
             </Paper>

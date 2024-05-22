@@ -12,11 +12,11 @@ import dayjs from "dayjs";
 import { Link } from "react-router-dom";
 
 interface IPetitionProps {
-    petition: Petition
+    petition: Petitions
 }
 
 function PetitionCard(props: IPetitionProps) {
-    const [petition] = React.useState<Petition>(props.petition);
+    const [petition] = React.useState<Petitions>(props.petition);
     const [category, setCategory] = React.useState<string>("");
     const petitionCardStyles: CSS.Properties = {
         display: "inline-block", width: "300px", margin: "10px", padding: "0px"
@@ -35,6 +35,13 @@ function PetitionCard(props: IPetitionProps) {
     }, []);
 
     return (
+        // Create a card for a petition with the following:
+        // Hero image,
+        // title,
+        // creation date,
+        // category,
+        // owner (first and last name and hero image),
+        // supporting cost (of the minimum tier)
         <Card sx={petitionCardStyles}>
             <CardActionArea component={Link} to={'/petitions/' + petition.petitionId}>
                 <CardHeader style={{ textAlign: "left", height: "50px" }}
@@ -54,14 +61,11 @@ function PetitionCard(props: IPetitionProps) {
                     <Typography variant="h6">
                         {petition.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Money Raised: ${petition.moneyRaised}
-                    </Typography>
                 </CardContent>
                 <CardActions>
                     <Chip label={category}/>
                     <Typography variant="body2" color="text.secondary" sx={{marginLeft: "auto !important"}}>
-                        Supporters: {petition.numberOfSupporters}
+                        Cost: {petition.supportingCost}
                     </Typography>
                 </CardActions>
             </CardActionArea>

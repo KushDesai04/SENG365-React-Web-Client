@@ -16,7 +16,7 @@ import {
     TextField,
     Checkbox
 } from "@mui/material";
-import PetitionCard from "./PetitionCard"
+import PetitionCard from "./PetitionsCard"
 import SearchIcon from '@mui/icons-material/Search';
 import {Category} from "@mui/icons-material";
 
@@ -157,6 +157,7 @@ const PetitionList = () => {
                         <TextField id="outlined-basic" label="Max Supporting Cost" variant="outlined" size="small"
                                    onChange={(event) => changeSupportingCost(event.target.value)}/>
                     </div>
+                    {/* Categories Filter */}
                     <div>
                         <FormControl sx={{m: 1, width: 300}}>
                             <InputLabel id="category-filter">Categories</InputLabel>
@@ -176,8 +177,9 @@ const PetitionList = () => {
                                 </MenuItem>))}
                             </Select>
                         </FormControl>
-                    </div>
-                    <div>
+                    
+                    {/* Sort By Filter */}
+                    
                         <FormControl sx={{m: 1, width: 300}}>
                             <InputLabel id="sort-by">Sort By</InputLabel>
                             <Select
