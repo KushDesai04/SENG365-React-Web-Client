@@ -15,9 +15,14 @@ interface IPetitionProps {
     petition: Petitions
 }
 
+const numberToRGB = (num: number) => {
+    const r = (num * 137.5) % 360;
+    return `hsl(${r}, 100%, 40%)`
+}
 function PetitionCard(props: IPetitionProps) {
     const [petition] = React.useState<Petitions>(props.petition);
     const [category, setCategory] = React.useState<string>("");
+    const [categoryId] = React.useState<number>(petition.categoryId);
     const petitionCardStyles: CSS.Properties = {
         display: "inline-block", width: "300px", margin: "10px", padding: "0px"
     };
@@ -63,7 +68,7 @@ function PetitionCard(props: IPetitionProps) {
                     </Typography>
                 </CardContent>
                 <CardActions>
-                    <Chip label={category}/>
+                    <Chip label={category} variant="filled" sx={{backgroundColor: numberToRGB(categoryId), color:"white", fontWeight: "bold"}}/>
                     <Typography variant="body2" color="text.secondary" sx={{marginLeft: "auto !important"}}>
                         Cost: {petition.supportingCost}
                     </Typography>
