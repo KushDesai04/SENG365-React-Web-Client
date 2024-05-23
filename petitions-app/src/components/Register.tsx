@@ -7,8 +7,6 @@ import {Link, useNavigate} from "react-router-dom";
 import {useUserStore} from "../store";
 
 const Register = () => {
-    const setUser = useUserStore(state => state.setUser)
-    const setUserId = useUserStore(state => state.setUserId)
     const [firstNameError, setFirstNameError] = React.useState(false)
     const [lastNameError, setLastNameError] = React.useState(false)
     const [emailError, setEmailError] = React.useState(false)
@@ -35,8 +33,6 @@ const Register = () => {
                     lastName: data.get('lastName') as string
 
                 }
-                setUser(user)
-                setUserId(userId)
                 navigate('/login')
             }, (error) => {
                 const errorMessage = error.response.statusText.split('/')[1]
@@ -91,7 +87,7 @@ const Register = () => {
                                 autoFocus
                                 error={firstNameError}
                             />
-                            <Typography variant="caption" color="error" align="left">
+                            <Typography variant="overline" color="error" align="left">
                                 {firstNameError ? "First name is required" : ""}
                             </Typography>
                         </Grid>
@@ -105,7 +101,7 @@ const Register = () => {
                                 autoComplete="family-name"
                                 error={lastNameError}
                             />
-                            <Typography variant="caption" color="error" align="left">
+                            <Typography variant="overline" color="error" align="left">
                                 {lastNameError ? "Last name is required" : ""}
                             </Typography>
                         </Grid>
@@ -119,7 +115,7 @@ const Register = () => {
                                 autoComplete="email"
                                 error={emailError || emailInUseError}
                             />
-                            <Typography variant="caption" color="error" align="left">
+                            <Typography variant="overline" color="error" align="left">
                                 {emailError ? "Email must be in the format: jane@doe.com" : ""}
                                 {emailInUseError ? "Email is already in use" : ""}
                             </Typography>
@@ -135,7 +131,7 @@ const Register = () => {
                                 autoComplete="new-password"
                                 error={passwordError}
                             />
-                            <Typography variant="caption" color="error" align="left">
+                            <Typography variant="overline" color="error" align="left">
                                 {passwordError ? "Password must be at least 6 characters long" : ""}
                             </Typography>
                         </Grid>

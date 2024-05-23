@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import PetitionList from "./components/PetitionList";
-import PetitionObject from "./components/PetitionObject";
+import ViewPetition from "./components/ViewPetition";
 import Layout from "./components/Layout";
 import Register from "./components/Register";
 import Login from "./components/Login";
@@ -16,7 +16,7 @@ function App() {
             <div>
               <Routes>
                   <Route path="/petitions" element={<PetitionList />}/>
-                  <Route path="/petitions/:id" element={<PetitionObject />}/>
+                  <Route path="/petitions/:id" element={<ViewPetition />}/>
                   <Route path="/register" element={<Register />}/>
                   <Route path="/login" element={<Login />}/>
 

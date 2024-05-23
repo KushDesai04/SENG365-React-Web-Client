@@ -23,8 +23,9 @@ import PetitionCard from "./PetitionCard"
 import { request } from 'http';
 import { useParams } from 'react-router-dom';
 import SupportTierCard from './SupportTierCard';
+import PetitionsCard from "./PetitionsCard"
 
-const PetitionObject = () => {
+const ViewPetition = () => {
     const {id} = useParams<{id: string}>()
     const [petition, setPetition] = React.useState<Petition>()
     const [petitionToDisplay, setPetitionToDisplay] = React.useState<JSX.Element>()
@@ -33,16 +34,18 @@ const PetitionObject = () => {
     const [errorMessage, setErrorMessage] = React.useState("")
     const [infoFlag, setInfoFlag] = React.useState(false)
     const [infoMessage, setInfoMessage] = React.useState("")
+    const [similarPetitions, setSimilarPetitions] = React.useState<Petitions[]>([])
+    const [noSimilarPetitionsFlag, setNoSimilarPetitionsFlag] = React.useState(false)
 
-    
+
     React.useEffect(() => {
-        const getPetitions = () => {
+        const getPetition = () => {
             axios.get('http://localhost:4941/api/v1/petitions/' + id)
                 .then((response) => {
                     setErrorFlag(false)
                     setErrorMessage("")
                     setPetition(response.data)
-                    setPetitionToDisplay(<PetitionCard key={response.data.petitionId + response.data.title} petition={response.data}/>)
+                    setPetitionToDisplay(<PetitionCard key={response.data.petitionId + response.data.title} petition={response.data} />)
                     if (response.data.count === 0) {
                         setInfoFlag(true)
                         setInfoMessage("No petitions found")
@@ -50,6 +53,8 @@ const PetitionObject = () => {
                         setInfoFlag(false)
                         setInfoMessage("")
                     }
+                    // Call getSimilarPetitions after setting the petition data
+                    getSimilarPetitions(response.data);
                 }, (error) => {
                     setErrorFlag(true)
                     setErrorMessage(error.toString())
@@ -58,7 +63,6 @@ const PetitionObject = () => {
         const getSupporters = () => {
             axios.get('http://localhost:4941/api/v1/petitions/' + id + '/supporters')
                 .then((response) => {
-                    console.log("here")
                     console.log(response.data)
                     setSupporters(response.data)
                 }, (error) => {
@@ -66,13 +70,41 @@ const PetitionObject = () => {
                     setErrorMessage(error.toString())
                 })
         }
+        const getSimilarPetitions = (petition: Petition) => {
+            const ownerIdRequest = axios.get(`http://localhost:4941/api/v1/petitions?ownerId=${petition.ownerId}`);
+            const categoryIdsRequest = axios.get(`http://localhost:4941/api/v1/petitions?categoryIds=${petition.categoryId}`);
+
+            Promise.all([ownerIdRequest, categoryIdsRequest])
+                .then(([ownerIdResponse, categoryIdsResponse]) => {
+                    setErrorFlag(false);
+                    setErrorMessage("");
+
+                    const ownerIdPetitions = ownerIdResponse.data.petitions;
+                    const categoryIdsPetitions = categoryIdsResponse.data.petitions;
+
+                    // Combine the results from both API calls
+                    const allPetitions = [...ownerIdPetitions, ...categoryIdsPetitions];
+
+                    // Remove duplicates and the current petition
+                    const filteredSimilarPetitions = Array.from(new Set(allPetitions.filter((p: Petitions) => p.petitionId !== petition.petitionId)));
+
+                    setSimilarPetitions(filteredSimilarPetitions);
+
+                    if (filteredSimilarPetitions.length === 0) {
+                        setNoSimilarPetitionsFlag(true);
+                    } else {
+                        setNoSimilarPetitionsFlag(false);
+                    }
+                })
+                .catch((error) => {
+                    setErrorFlag(true);
+                    setErrorMessage(error.toString());
+                });
+        };
         getSupporters()
-        getPetitions()
+        getPetition()
     }, [id])
 
-    // const petition_support = () => petition && petition.supportTiers.map((supportTier: SupportTier) => <SupportTierCard
-    //     key={supportTier.supportTierId} supportTier={supportTier} supporter={supporters.filter((supporter: Supporter) => supporter.supportTierId === supportTier.supportTierId)[0]}
-    // />)
     const petition_support = () => {
         if (!petition) return null
 
@@ -83,13 +115,20 @@ const PetitionObject = () => {
         })
     }
 
+
+
+    const petition_rows = () => similarPetitions.map((similarPet: Petitions) => <PetitionsCard
+        key={similarPet.petitionId + similarPet.title} petition={similarPet}
+    />)
+
     const card: CSS.Properties = {
         padding: "10px", margin: "0", display: "block"
     }
+
     return (<>
 
-            <Paper elevation={1} style={card}>
-                <Button variant="contained" color="primary" href="/petitions">Back</Button>
+            <Paper elevation={1} style={card} sx={{textAlign: "left"}}>
+                <Button variant="contained" color="primary" href="/petitions" sx={{marginLeft:"15px !important"}}>Back</Button>
             </Paper>
 
             <Paper elevation={1} style={card}>
@@ -109,10 +148,14 @@ const PetitionObject = () => {
                 <h1>Supporters</h1>
                 {petition_support()}
             </Paper>
+            <Paper elevation={1} style={card}>
+                <h1>Similar Petitions</h1>
+                {noSimilarPetitionsFlag ? <Typography color={"error"}>No similar petitions</Typography> : petition_rows()}
+            </Paper>
 
 
         </>
 
     )
 }
-export default PetitionObject
+export default ViewPetition

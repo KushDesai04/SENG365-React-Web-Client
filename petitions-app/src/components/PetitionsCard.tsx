@@ -19,7 +19,7 @@ const numberToRGB = (num: number) => {
     const r = (num * 137.5) % 360;
     return `hsl(${r}, 100%, 40%)`
 }
-function PetitionCard(props: IPetitionProps) {
+function PetitionsCard(props: IPetitionProps) {
     const [petition] = React.useState<Petitions>(props.petition);
     const [category, setCategory] = React.useState<string>("");
     const [categoryId] = React.useState<number>(petition.categoryId);
@@ -78,4 +78,4 @@ function PetitionCard(props: IPetitionProps) {
     );
 }
 
-export default PetitionCard
+export default PetitionsCard

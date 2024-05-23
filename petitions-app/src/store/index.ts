@@ -1,35 +1,35 @@
 import create from 'zustand';
 interface UserState {
 
-    user: User;
     userId: number;
-    setUser: (user: User) => void;
+    userToken: string;
     setUserId: (userId: number) => void;
+    setUserToken: (userToken: string) => void;
     removeUser: () => void;
 }
 
-const getUser = (key: string): User => JSON.parse(window.localStorage.getItem(key) as string);
 const getUserId = (key: string): number => JSON.parse(window.localStorage.getItem(key) as string);
-const setUser = (key: string, value: User) => window.localStorage.setItem(key, JSON.stringify(value));
+const getUserToken = (key: string): string => JSON.parse(window.localStorage.getItem(key) as string);
 const setUserId = (key: string, value: number) => window.localStorage.setItem(key, JSON.stringify(value));
-const removeLocalStorage = (key: string) => {window.localStorage.removeItem(key); window.localStorage.removeItem('userId')};
+const setUserToken = (key: string, value: string) => window.localStorage.setItem(key, JSON.stringify(value));
+const removeLocalStorage = () => {window.localStorage.removeItem("userId"); window.localStorage.removeItem('userToken')};
 
 const useStore = create<UserState>((set) => ({
-    user: getUser('user') || null,
     userId: getUserId('userId'),
-
-    setUser: (user: User) => set(() => {
-        setUser('user', user)
-        return {user: user}
-    }),
+    userToken: getUserToken('userToken'),
 
     setUserId: (userId: number) => set(() => {
         setUserId('userId', userId)
         return {userId: userId}
     }),
 
+    setUserToken: (userToken: string) => set(() => {
+        setUserToken('userToken', userToken)
+        return {userToken: userToken}
+    }),
+
     removeUser: () => {
-        removeLocalStorage("user")
+        removeLocalStorage()
     }
 }))
 export const useUserStore = useStore;

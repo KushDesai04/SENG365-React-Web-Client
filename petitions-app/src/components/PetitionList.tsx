@@ -16,7 +16,7 @@ import {
     TextField,
     Checkbox
 } from "@mui/material";
-import PetitionCard from "./PetitionsCard"
+import PetitionsCard from "./PetitionsCard"
 import SearchIcon from '@mui/icons-material/Search';
 import {Category} from "@mui/icons-material";
 
@@ -33,6 +33,8 @@ const SortOptions = [{
 }, {
     value: 'ALPHABETICAL_DESC', label: 'A-Z Descending'
 }]
+
+
 const PetitionList = () => {
     const [petitions, setPetitions] = React.useState<Array<Petitions>>([])
     const [errorFlag, setErrorFlag] = React.useState(false)
@@ -130,7 +132,7 @@ const PetitionList = () => {
         setPetitionSort(value)
     }
 
-    const petition_rows = () => petitions.map((petition: Petitions) => <PetitionCard
+    const petition_rows = () => petitions.map((petition: Petitions) => <PetitionsCard
         key={petition.petitionId + petition.title} petition={petition}
     />)
     const card: CSS.Properties = {
