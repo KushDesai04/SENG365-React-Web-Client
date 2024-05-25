@@ -24,7 +24,7 @@ function PetitionsCard(props: IPetitionProps) {
     const [category, setCategory] = React.useState<string>("");
     const [categoryId] = React.useState<number>(petition.categoryId);
     const petitionCardStyles: CSS.Properties = {
-        display: "inline-block", width: "300px", margin: "10px", padding: "0px"
+        display: "inline-block", width: "400px", margin: "10px", padding: "0px"
     };
     React.useEffect(() => {
         const getCategory = () => {

@@ -27,13 +27,14 @@ const Register = () => {
             .then((response) => {
                 const userId = response.data.userId
                 console.log(userId)
-                const user = {
-                    email: data.get('email') as string,
-                    firstName: data.get('firstName') as string,
-                    lastName: data.get('lastName') as string
 
-                }
-                navigate('/login')
+                axios.post('http://localhost:4941/api/v1/users/login', {
+                    "email": data.get('email'),
+                    "password": data.get('password')
+                }).then(response =>{
+                    useUserStore.setState({userId: userId, userToken: response.data.token})
+                    navigate('/petitions')
+                })
             }, (error) => {
                 const errorMessage = error.response.statusText.split('/')[1]
                 const errorType = error.response.status

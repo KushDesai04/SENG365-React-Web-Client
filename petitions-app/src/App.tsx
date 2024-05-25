@@ -8,6 +8,7 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import MyPetitions from "./components/MyPetitions";
 import CreatePetition from "./components/CreatePetition";
+import EditPetition from "./components/EditPetition";
 
 function App() {
   return (
@@ -23,6 +24,9 @@ function App() {
                   <Route path="/login" element={<Login />}/>
                   <Route path="/mypetitions" element={<MyPetitions />}/>
                   <Route path="/createpetition" element={<CreatePetition />}/>
+                  <Route path="/editpetition/:petitionId" element={<EditPetition />}/>
+
+
               </Routes>
             </div>
               </Layout>

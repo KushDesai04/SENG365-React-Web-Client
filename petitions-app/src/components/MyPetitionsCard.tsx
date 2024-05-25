@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import CSS from 'csstype';
 import dayjs from "dayjs";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {useUserStore} from "../store";
 
 interface IPetitionProps {
@@ -33,6 +33,7 @@ const numberToRGB = (num: number) => {
 }
 
 function PetitionsCard(props: IPetitionProps) {
+    const navigate = useNavigate();
     const userToken = useUserStore(state => state.userToken);
     const userId = useUserStore(state => state.userId);
     const [petition] = React.useState<Petitions>(props.petition);
@@ -42,7 +43,7 @@ function PetitionsCard(props: IPetitionProps) {
     const [open, setOpen] = React.useState(false);
 
     const petitionCardStyles: CSS.Properties = {
-        display: "inline-block", width: "300px", margin: "10px", padding: "0px"
+        display: "inline-block", width: "400px", margin: "10px", padding: "0px"
     };
 
     const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
@@ -111,20 +112,29 @@ function PetitionsCard(props: IPetitionProps) {
                 <CardActions>
                     <Chip label={category} variant="filled"
                           sx={{backgroundColor: numberToRGB(categoryId), color: "white", fontWeight: "bold"}}/>
+
                     {petition.ownerId === userId ? (
-                        <><Button color="error" variant="outlined" sx={{marginLeft: "auto !important"}}
-                                  onClick={() => setOpenDialog(true)}>
-                            Delete
-                        </Button><Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-                            <DialogTitle>Confirm Delete</DialogTitle>
-                            <DialogContent>
-                                <Typography variant="body1">Are you sure you want to delete this petition?</Typography>
-                            </DialogContent>
-                            <DialogActions>
-                                <Button variant="outlined" onClick={() => setOpenDialog(false)}>Cancel</Button>
-                                <Button variant="outlined" onClick={handleDelete} color="error">Delete</Button>
-                            </DialogActions>
-                        </Dialog></>
+                        <>
+                            <Button variant="outlined" sx={{marginLeft: "auto !important"}}
+                                    onClick={() => navigate('/editPetition/' + petition.petitionId)}>
+                                Edit
+                            </Button>
+                            <Button color="error" variant="outlined"
+                                    onClick={() => setOpenDialog(true)}>
+                                Delete
+                            </Button>
+                            <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                                <DialogTitle>Confirm Delete</DialogTitle>
+                                <DialogContent>
+                                    <Typography variant="body1">Are you sure you want to delete this
+                                        petition?</Typography>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button variant="outlined" onClick={() => setOpenDialog(false)}>Cancel</Button>
+                                    <Button variant="outlined" onClick={handleDelete} color="error">Delete</Button>
+                                </DialogActions>
+                            </Dialog>
+                        </>
                     ) : ""}
 
                 </CardActions>
