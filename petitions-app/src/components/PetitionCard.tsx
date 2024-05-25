@@ -15,11 +15,16 @@ interface IPetitionProps {
     petition: Petition
 }
 
+const numberToRGB = (num: number) => {
+    const r = (num * 137.5) % 360;
+    return `hsl(${r}, 100%, 40%)`
+}
+
 function PetitionCard(props: IPetitionProps) {
     const [petition] = React.useState<Petition>(props.petition);
     const [category, setCategory] = React.useState<string>("");
     const petitionCardStyles: CSS.Properties = {
-        display: "inline-block", width: "400px", margin: "10px", padding: "0px"
+        display: "inline-block", width: "50vw", margin: "10px", padding: "0px"
     };
     React.useEffect(() => {
         const getCategory = () => {
@@ -45,24 +50,24 @@ function PetitionCard(props: IPetitionProps) {
                     subheader={"Created: " + dayjs(petition.creationDate).format("DD-MM-YYYY")} />
                 <CardMedia
                     component="img"
-                    height="200"
-                    width="300"
-                    sx={{ objectFit: "cover"}}
+                    sx={{ objectFit: "cover", maxHeight:"50vh"}}
                     image={"http://localhost:4941/api/v1/petitions/" + petition.petitionId + "/image"}
                     alt="Petition hero" />
-                <CardContent sx={{ height: "100px"}}>
-                    <Typography variant="h6">
+                <CardContent sx={{ height: "200px"}}>
+                    <Typography variant="h5">
                         {petition.title}
+                    </Typography>
+                    <Typography variant="h6">
+                        {petition.description}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         Money Raised: ${petition.moneyRaised}
                     </Typography>
                 </CardContent>
                 <CardActions>
-                    <Chip label={category}/>
-                    <Typography variant="body2" color="text.secondary" sx={{marginLeft: "auto !important"}}>
-                        Supporters: {petition.numberOfSupporters}
-                    </Typography>
+                    <Chip label={category} size="medium" sx={{backgroundColor: numberToRGB(petition.categoryId), color:"white", fontWeight: "bold"}}/>
+                    <Chip label={"Supporters: " + petition.numberOfSupporters} sx={{marginLeft: "auto !important"}} size="medium"/>
+
                 </CardActions>
             </CardActionArea>
         </Card>

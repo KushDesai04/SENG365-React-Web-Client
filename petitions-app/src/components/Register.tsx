@@ -58,7 +58,7 @@ const Register = () => {
                     uploadImage(userId, response.data.token)
                     setUserToken(response.data.token)
                     setUserId(userId)
-
+                    navigate('/petitions')
                 })
             }, (error) => {
                 const errorMessage = error.response.statusText.split('/')[1]

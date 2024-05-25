@@ -330,13 +330,6 @@ const CreatePetition = () => {
                         >
                             Create Petition
                         </Button>
-                        <Grid container justifyContent="flex-end">
-                            <Grid item>
-                                <Link to={"/petitions"}>
-                                    Back to Petitions
-                                </Link>
-                            </Grid>
-                        </Grid>
                     </Grid>
                 </Grid>
             </Box>

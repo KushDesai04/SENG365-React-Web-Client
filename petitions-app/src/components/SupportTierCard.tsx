@@ -33,7 +33,7 @@ function SupportTierCard(props: ISupportTierProps) {
 
 
     const CardStyles: CSS.Properties = {
-        display: "inline-block", width: "300px", margin: "10px", padding: "0px"
+        display: "inline-block", width: "400px", margin: "10px", padding: "0px"
     };
 
     const displaySupporters = () => {
@@ -85,9 +85,9 @@ function SupportTierCard(props: ISupportTierProps) {
             <Card sx={CardStyles}>
                 <CardHeader sx={{ height: "50px" }}
                     title={supportTier.title} />
-                <CardContent sx={{ height: "120px" }}>
-                    <Chip label={"$" + supportTier.cost} />
-                    <Typography variant="body2" color="text.primary">
+                <CardContent sx={{ height: "100px" }}>
+                    <Chip label={"$ " + supportTier.cost} />
+                    <Typography variant="body2" color="text.primary" sx={{margin:"5% !important"}}>
                         {supportTier.description}
                     </Typography>
                 </CardContent>

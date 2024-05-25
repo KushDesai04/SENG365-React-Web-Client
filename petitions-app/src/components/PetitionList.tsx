@@ -19,7 +19,6 @@ import {
 } from "@mui/material";
 import PetitionsCard from "./PetitionsCard"
 import SearchIcon from '@mui/icons-material/Search';
-import {Category} from "@mui/icons-material";
 
 const SortOptions = [{
     value: 'CREATED_ASC', label: 'Creation Date'
@@ -32,7 +31,7 @@ const SortOptions = [{
 }, {
     value: 'ALPHABETICAL_ASC', label: 'A-Z'
 }, {
-    value: 'ALPHABETICAL_DESC', label: 'A-Z Descending'
+    value: 'ALPHABETICAL_DESC', label: 'Z-A'
 }]
 
 
