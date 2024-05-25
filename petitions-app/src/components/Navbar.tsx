@@ -5,18 +5,20 @@ import {useUserStore} from "../store";
 import axios from "axios";
 
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
     const userId = useUserStore(state => state.userId);
     const userToken = useUserStore(state => state.userToken);
     const removeUser = useUserStore(state => state.removeUser);
     const navigate = useNavigate()
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const [user, setUser] = React.useState<User | null>(null);
+    const [imageURL, setImageURL] = React.useState<string>("")
 
     React.useEffect(() => {
         if (userId) {
             axios.get('http://localhost:4941/api/v1/users/' + userId).then((response) => {
                 setUser(response.data)
+                setImageURL(`http://localhost:4941/api/v1/users/${userId}/image`)
             }, (error) => {
                 console.log(error)
             })
@@ -76,7 +78,7 @@ const Navbar: React.FC = () => {
                     {userToken ? (
                         <>
                             <IconButton onClick={handleMenu} color="inherit">
-                                <Avatar alt="Profile Pic" src={`http://localhost:4941/api/v1/users/${userId}/image`}>
+                                <Avatar alt="Profile Pic" src={imageURL}>
                                     {user ? user.firstName[0] + user.lastName[0] : ""}
                                 </Avatar>
                             </IconButton>

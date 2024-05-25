@@ -17,6 +17,7 @@ const removeLocalStorage = () => {window.localStorage.removeItem("userId"); wind
 const useStore = create<UserState>((set) => ({
     userId: getUserId('userId'),
     userToken: getUserToken('userToken'),
+    userImageChanged: false,
 
     setUserId: (userId: number) => set(() => {
         setUserId('userId', userId)
@@ -30,6 +31,6 @@ const useStore = create<UserState>((set) => ({
 
     removeUser: () => {
         removeLocalStorage()
-    }
+    },
 }))
 export const useUserStore = useStore;

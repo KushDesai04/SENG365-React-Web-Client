@@ -73,7 +73,7 @@ const MyPetitions = () => {
                     alignItems: "center",
                     position: "relative"
                 }}>
-                    <h1 style={{gridColumn: "1 / -1", textAlign: "center", margin: 0}}>My Petitions</h1>
+                    <h1 style={{gridColumn: "1 / -1", textAlign: "center", margin: 0}}>Petitionary</h1>
                     <Link to="/createPetition">
                         <IconButton color="primary" sx={{border: "1px solid", position: "absolute", top: 0, right: 22}}>
                             <AddIcon/>

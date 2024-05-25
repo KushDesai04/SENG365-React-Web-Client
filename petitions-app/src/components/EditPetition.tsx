@@ -77,12 +77,10 @@ const EditPetition = () => {
     };
 
     const addSupportTier = () => {
-        console.log(openDialogs);
         if (supportTiers.length < 3) {
             setSupportTiers([...supportTiers, { supportTierId: -1, title: '', description: '', cost: 0 }]);
-            setOpenDialogs([...openDialogs, true]); // Add a new dialog state as open
+            openDialogs[supportTiers.length] = true
         }
-        console.log(openDialogs);
     };
 
     const updatePetition = (event: React.FormEvent<HTMLFormElement>) => {
@@ -226,6 +224,7 @@ const EditPetition = () => {
                     const newSupportTiers = [...supportTiers];
                     newSupportTiers[index] = { ...newSupportTiers[index], supportTierId: supportTier.supportTierId };
                     setSupportTiers(newSupportTiers);
+                    window.location.reload()
                 })
                 .catch((error) => {
                     console.log(error);
@@ -247,7 +246,7 @@ const EditPetition = () => {
                     const newSupportTiers = [...supportTiers];
                     newSupportTiers[index] = { ...newSupportTiers[index], supportTierId: supportTier.supportTierId };
                     setSupportTiers(newSupportTiers);
-
+                    window.location.reload()
                 })
                 .catch((error) => {
                     console.log(error);

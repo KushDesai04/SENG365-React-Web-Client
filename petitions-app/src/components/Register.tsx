@@ -5,15 +5,20 @@ import Container from "@mui/material/Container";
 import {Button, CssBaseline, Grid, TextField, Typography} from "@mui/material";
 import {Link, useNavigate} from "react-router-dom";
 import {useUserStore} from "../store";
+import {wait} from "@testing-library/user-event/dist/utils";
 
 const Register = () => {
+    const setUserId = useUserStore(state => state.setUserId)
+    const setUserToken = useUserStore(state => state.setUserToken)
     const [firstNameError, setFirstNameError] = React.useState(false)
     const [lastNameError, setLastNameError] = React.useState(false)
     const [emailError, setEmailError] = React.useState(false)
     const [emailInUseError, setEmailInUseError] = React.useState(false)
     const [passwordError, setPasswordError] = React.useState(false)
+    const [imageError, setImageError] = React.useState(false);
+    const [contentType, setContentType] = React.useState('');
+    const [image, setImage] = React.useState<File | null>(null);
     const navigate = useNavigate();
-
 
     const submit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -32,8 +37,10 @@ const Register = () => {
                     "email": data.get('email'),
                     "password": data.get('password')
                 }).then(response =>{
-                    useUserStore.setState({userId: userId, userToken: response.data.token})
-                    navigate('/petitions')
+                    uploadImage(userId, response.data.token)
+                    setUserToken(response.data.token)
+                    setUserId(userId)
+
                 })
             }, (error) => {
                 const errorMessage = error.response.statusText.split('/')[1]
@@ -59,6 +66,50 @@ const Register = () => {
                 }
             })
     }
+
+    const chooseImage = (file: File | null) => {
+        if (file) {
+            setImageError(false);
+            let contentType;
+            switch (file.type) {
+                case 'image/png':
+                    contentType = 'image/png';
+                    break;
+                case 'image/jpeg':
+                    contentType = 'image/jpeg';
+                    break;
+                case 'image/gif':
+                    contentType = 'image/gif';
+                    break;
+                default:
+                    setImageError(true);
+                    return;
+            }
+
+            setContentType(contentType);
+            setImage(file)
+        } else {
+            setImageError(!file);
+        }
+    };
+
+    const uploadImage = async (userId: number, userToken: string) => {
+        if (userId && image && contentType) {
+            const config = {
+                headers: {
+                    'Content-Type': contentType,
+                    'X-Authorization': userToken
+                }
+            };
+            try {
+                await axios.put(`http://localhost:4941/api/v1/users/${userId}/image`, image, config);
+                console.log('Image uploaded successfully');
+                navigate('/petitions');
+            } catch (error) {
+                console.log("Image error:", error);
+            }
+        }
+    };
 
     return (
 
@@ -137,6 +188,15 @@ const Register = () => {
                             </Typography>
                         </Grid>
                     </Grid>
+                    <Button variant="contained" component="label">
+                        Upload Image
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/gif"
+                            hidden
+                            onChange={e => chooseImage(e.target.files?.[0] || null)}
+                        />
+                    </Button>
                     <Button
                         fullWidth
                         variant="contained"
