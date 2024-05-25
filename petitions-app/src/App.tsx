@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
 import PetitionList from "./components/PetitionList";
 import ViewPetition from "./components/ViewPetition";
 import Layout from "./components/Layout";
@@ -10,6 +10,7 @@ import MyPetitions from "./components/MyPetitions";
 import CreatePetition from "./components/CreatePetition";
 import EditPetition from "./components/EditPetition";
 import Profile from "./components/Profile";
+import EditProfile from "./components/EditProfile";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
               <Layout>
             <div>
               <Routes>
+                  <Route path="/" element={<Navigate to="/petitions" />} />
                   <Route path="/petitions" element={<PetitionList />}/>
                   <Route path="/petitions/:id" element={<ViewPetition />}/>
                   <Route path="/register" element={<Register />}/>
@@ -27,6 +29,7 @@ function App() {
                   <Route path="/createpetition" element={<CreatePetition />}/>
                   <Route path="/editpetition/:petitionId" element={<EditPetition />}/>
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/editprofile" element={<EditProfile />} />
 
               </Routes>
             </div>

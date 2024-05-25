@@ -3,25 +3,30 @@ import React from "react";
 import Container from "@mui/material/Container";
 import {
     Alert,
+    Avatar,
     Box,
     Button,
     CssBaseline,
     Dialog,
     FormControl,
     Grid,
+    IconButton,
     InputLabel,
     MenuItem,
     OutlinedInput,
     Select,
     Snackbar,
+    styled,
     TextField,
     Typography
 } from "@mui/material";
-import { useParams, useNavigate } from "react-router-dom";
-import { useUserStore } from "../store";
+import {useNavigate, useParams} from "react-router-dom";
+import {useUserStore} from "../store";
+import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
 
 const EditPetition = () => {
-    const { petitionId } = useParams<{ petitionId: string }>();
+    const {petitionId} = useParams<{ petitionId: string }>();
     const userToken = useUserStore(state => state.userToken);
     const userId = useUserStore(state => state.userId);
     const [petition, setPetition] = React.useState<Petition>();
@@ -30,13 +35,19 @@ const EditPetition = () => {
     const [categoryIdError, setCategoryIdError] = React.useState(false);
     const [supportTiersError, setSupportTiersError] = React.useState(false);
     const [imageError, setImageError] = React.useState(false);
-    const [supportTiers, setSupportTiers] = React.useState<SupportTier[]>([{ supportTierId: -1, title: '', description: '', cost: 0 }]);
+    const [supportTiers, setSupportTiers] = React.useState<SupportTier[]>([{
+        supportTierId: -1,
+        title: '',
+        description: '',
+        cost: 0
+    }]);
     const [categories, setCategories] = React.useState<Array<Category>>([]);
     const [selectedCategory, setSelectedCategory] = React.useState<string>("1");
     const [openDialogs, setOpenDialogs] = React.useState<boolean[]>(new Array(supportTiers.length).fill(false));
     const [snackboxMessage, setSnackboxMessage] = React.useState<string>("");
     const [successSnackboxOpen, setSuccessSnackboxOpen] = React.useState<boolean>(false);
     const [errorSnackboxOpen, setErrorSnackboxOpen] = React.useState<boolean>(false);
+    const [petitionPictureUrl, setPetitionPictureUrl] = React.useState<string>("");
     const navigate = useNavigate();
 
     React.useEffect(() => {
@@ -50,6 +61,7 @@ const EditPetition = () => {
                     setPetition(response.data);
                     setSelectedCategory(response.data.categoryId);
                     setSupportTiers(response.data.supportTiers);
+                    setPetitionPictureUrl(`http://localhost:4941/api/v1/petitions/${petitionId}/image?${new Date().getTime()}`);
                 }, (error) => {
                     console.log(error);
                 });
@@ -66,19 +78,29 @@ const EditPetition = () => {
         getPetition();
     }, []);
 
+    const OverlayIconContainer = styled(Box)({
+        position: 'absolute',
+        bottom: 10,
+        right: 0,
+        backgroundColor: 'rgba(25, 118, 210, 1)',
+        padding: '4px',
+        borderRadius: '50%',
+        cursor: 'pointer',
+    });
+
     const selectCategoryChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
         setSelectedCategory(event.target.value);
     };
 
     const handleSupportTierChange = (index: number, field: keyof SupportTier, value: string | number) => {
         const newSupportTiers = [...supportTiers];
-        newSupportTiers[index] = { ...newSupportTiers[index], [field]: value };
+        newSupportTiers[index] = {...newSupportTiers[index], [field]: value};
         setSupportTiers(newSupportTiers);
     };
 
     const addSupportTier = () => {
         if (supportTiers.length < 3) {
-            setSupportTiers([...supportTiers, { supportTierId: -1, title: '', description: '', cost: 0 }]);
+            setSupportTiers([...supportTiers, {supportTierId: -1, title: '', description: '', cost: 0}]);
             openDialogs[supportTiers.length] = true
         }
     };
@@ -100,7 +122,7 @@ const EditPetition = () => {
 
         axios.patch('http://localhost:4941/api/v1/petitions/' + petitionId, {
             title, description, categoryId
-        }, { headers: { 'X-Authorization': userToken } })
+        }, {headers: {'X-Authorization': userToken}})
             .then((response) => {
                 setSnackboxMessage("Petition updated successfully");
                 setSuccessSnackboxOpen(true);
@@ -153,6 +175,7 @@ const EditPetition = () => {
                     setSnackboxMessage("Image uploaded successfully");
                     setSuccessSnackboxOpen(true);
                     setErrorSnackboxOpen(false);
+                    setPetitionPictureUrl(`http://localhost:4941/api/v1/petitions/${petitionId}/image?${new Date().getTime()}`);
                 })
                 .catch((error) => {
                     console.log("image error");
@@ -181,10 +204,11 @@ const EditPetition = () => {
         const tierId = supportTiers[index].supportTierId;
         if (tierId !== -1) {
             console.log("tierId: " + tierId);
-            axios.delete('http://localhost:4941/api/v1/petitions/' + petitionId + '/supportTiers/' + tierId, { headers: { 'X-Authorization': userToken } })
+            axios.delete('http://localhost:4941/api/v1/petitions/' + petitionId + '/supportTiers/' + tierId, {headers: {'X-Authorization': userToken}})
                 .then((response) => {
                     setSnackboxMessage("Support tier deleted successfully");
                     setSuccessSnackboxOpen(true);
+                    setErrorSnackboxOpen(false)
                     const newSupportTiers = [...supportTiers];
                     newSupportTiers.splice(index, 1);
                     setSupportTiers(newSupportTiers);
@@ -215,14 +239,14 @@ const EditPetition = () => {
                 title: supportTier.title,
                 description: supportTier.description,
                 cost: supportTier.cost
-            }, { headers: { 'X-Authorization': userToken } })
+            }, {headers: {'X-Authorization': userToken}})
                 .then((response) => {
                     setSnackboxMessage("Support tier created successfully");
                     setSuccessSnackboxOpen(true);
                     setErrorSnackboxOpen(false);
                     toggleDialog(index);
                     const newSupportTiers = [...supportTiers];
-                    newSupportTiers[index] = { ...newSupportTiers[index], supportTierId: supportTier.supportTierId };
+                    newSupportTiers[index] = {...newSupportTiers[index], supportTierId: supportTier.supportTierId};
                     setSupportTiers(newSupportTiers);
                     window.location.reload()
                 })
@@ -237,14 +261,14 @@ const EditPetition = () => {
                 title: supportTier.title,
                 description: supportTier.description,
                 cost: supportTier.cost
-            }, { headers: { 'X-Authorization': userToken } })
+            }, {headers: {'X-Authorization': userToken}})
                 .then((response) => {
                     setSnackboxMessage("Support tier created successfully");
                     setSuccessSnackboxOpen(true);
                     setErrorSnackboxOpen(false);
                     toggleDialog(index);
                     const newSupportTiers = [...supportTiers];
-                    newSupportTiers[index] = { ...newSupportTiers[index], supportTierId: supportTier.supportTierId };
+                    newSupportTiers[index] = {...newSupportTiers[index], supportTierId: supportTier.supportTierId};
                     setSupportTiers(newSupportTiers);
                     window.location.reload()
                 })
@@ -259,15 +283,16 @@ const EditPetition = () => {
     };
 
     return (<Container component="main" maxWidth="xs">
-        <CssBaseline />
+        <CssBaseline/>
         <Snackbar
             open={successSnackboxOpen || errorSnackboxOpen}
-            autoHideDuration={6000}
+            autoHideDuration={5000}
+            onClose={() => {setSuccessSnackboxOpen(false); setErrorSnackboxOpen(false)}}
         >
             <Alert
                 severity={successSnackboxOpen ? "success" : "error"}
                 variant="filled"
-                sx={{ width: '100%' }}
+                sx={{width: '100%'}}
             >
                 {snackboxMessage}
             </Alert>
@@ -280,8 +305,42 @@ const EditPetition = () => {
             <Typography component="h1" variant="h5">
                 Edit Petition
             </Typography>
-            <Grid component="form" noValidate onSubmit={updatePetition} sx={{ mt: 3 }}>
+            <Grid component="form" noValidate onSubmit={updatePetition} sx={{mt: 3}}>
+
                 <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <Box position="relative" display="inline-block">
+                            {petitionPictureUrl && (
+                                <Box
+                                    component="img"
+                                    src={petitionPictureUrl}
+                                    alt="Petition"
+                                    sx={{
+                                        width: "100%",
+                                        objectFit: 'cover',
+                                        borderRadius: '8px',
+                                    }}
+                                />
+                            )}
+                            <OverlayIconContainer>
+                                <label htmlFor="image-upload">
+                                    <input
+                                        id="image-upload"
+                                        name="image-upload"
+                                        type="file"
+                                        style={{display: 'none'}}
+                                        onChange={(event) => chooseImage(event.target.files ? event.target.files[0] : null)}
+                                    />
+                                    <IconButton component="span">
+                                        <EditIcon sx={{color: 'white'}}/>
+                                    </IconButton>
+                                </label>
+                            </OverlayIconContainer>
+                        </Box>
+                        {imageError && (
+                            <><br/><Typography variant="overline"color="error">Only PNG, JPEG, and GIF files are allowed</Typography></>
+                        )}
+                    </Grid>
                     {petition && (<>
                         <Grid item xs={12}>
                             <TextField
@@ -294,7 +353,6 @@ const EditPetition = () => {
                                 autoFocus
                                 error={titleError}
                                 defaultValue={petition.title}
-                                onChange={(e) => console.log("changed")}
                                 helperText={titleError ? "Title is required" : ""}
                             />
                         </Grid>
@@ -315,14 +373,14 @@ const EditPetition = () => {
                     </>)}
 
                     <Grid item xs={12}>
-                        <FormControl sx={{ width: "100%" }}>
+                        <FormControl sx={{width: "100%"}}>
                             <InputLabel id="category-filter">Category</InputLabel>
                             <Select
                                 labelId="category-filter-label"
                                 id="category-filter-select"
                                 value={selectedCategory}
                                 onChange={selectCategoryChange}
-                                input={<OutlinedInput label="Category" />}
+                                input={<OutlinedInput label="Category"/>}
                             >
                                 {categories.map((category) => (<MenuItem
                                     key={category.categoryId}
@@ -333,14 +391,24 @@ const EditPetition = () => {
                             </Select>
                         </FormControl>
                     </Grid>
+                    <Grid item xs={12} sx={{display:"ruby"}}>
+                        <Typography variant="h6" sx={{mt: 2}}>Support Tiers</Typography>
+                        {supportTiers.length < 3 && (<Grid item xs={12}>
+                            <IconButton color="primary" sx={{border: "1px solid", marginLeft: "5px"}} onClick={addSupportTier} size="small">
+                                <AddIcon fontSize="inherit"/>
+                            </IconButton>
+                        </Grid>)}
+                    </Grid>
+                    <Grid container spacing={2} sx={{display: "flex", justifyContent: "center", marginTop: "10px"}}>
                     {supportTiers.map((tier, index) => (
                         <Grid item key={index}>
                             <Button onClick={() => toggleDialog(index)} variant="outlined">
                                 Edit {tier.title ? tier.title : "Support Tier"}
                             </Button>
-                            <Dialog open={openDialogs[index]} onClose={() => toggleDialog(index)} fullWidth={true} maxWidth={"md"}>
+                            <Dialog open={openDialogs[index]} onClose={() => toggleDialog(index)} fullWidth={true}
+                                    maxWidth={"md"}>
                                 {/* Dialog content for each support tier */}
-                                <form onSubmit={(e) => e.preventDefault()} style={{ margin: "20px" }}>
+                                <form onSubmit={(e) => e.preventDefault()} style={{margin: "20px"}}>
                                     <Box p={2}>
                                         <TextField
                                             label="Support Tier Title"
@@ -348,7 +416,7 @@ const EditPetition = () => {
                                             fullWidth
                                             value={tier.title}
                                             onChange={(e) => handleSupportTierChange(index, 'title', e.target.value)}
-                                            sx={{ marginBottom: 2 }}
+                                            sx={{marginBottom: 2}}
                                         />
                                         <TextField
                                             label="Support Tier Description"
@@ -358,7 +426,7 @@ const EditPetition = () => {
                                             rows={4}
                                             value={tier.description}
                                             onChange={(e) => handleSupportTierChange(index, 'description', e.target.value)}
-                                            sx={{ marginBottom: 2 }}
+                                            sx={{marginBottom: 2}}
                                         />
                                         <TextField
                                             label="Support Tier Cost"
@@ -367,10 +435,10 @@ const EditPetition = () => {
                                             type="number"
                                             value={tier.cost}
                                             onChange={(e) => handleSupportTierChange(index, 'cost', Number(e.target.value))}
-                                            sx={{ marginBottom: 2 }}
+                                            sx={{marginBottom: 2}}
                                         />
                                     </Box>
-                                    <Box sx={{ display: "flex" }} p={2}>
+                                    <Box sx={{display: "flex"}} p={2}>
                                         <Button
                                             variant="outlined"
                                             color={"error"}
@@ -381,7 +449,7 @@ const EditPetition = () => {
                                         <Button
                                             variant="outlined"
                                             onClick={() => createSupportTier(index)}
-                                            sx={{ marginLeft: "auto" }}
+                                            sx={{marginLeft: "auto"}}
                                         >
                                             Save
                                         </Button>
@@ -390,41 +458,23 @@ const EditPetition = () => {
                             </Dialog>
                         </Grid>
                     ))}
-
-                    {supportTiers.length < 3 && (<Grid item xs={12}>
-                        <Button variant="outlined" onClick={addSupportTier}>
-                            Add Support Tier
-                        </Button>
-                    </Grid>)}
-                    <Grid item xs={12}>
-                        <Box>
-                            <Button variant="contained" component="label">
-                                Upload Image
-                                <input
-                                    type="file"
-                                    accept="image/png, image/jpeg, image/gif"
-                                    hidden
-                                    onChange={e => chooseImage(e.target.files?.[0] || null)}
-                                />
-                            </Button>
-                            <br />
-                            <Typography variant="overline" color="error" align="left">
-                                {imageError ? "Image must be of type .jpg/.png/.gif" : ""}
-                            </Typography>
-                        </Box>
                     </Grid>
-                    <Button
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                        type="submit"
-                    >
-                        Save Petition
-                    </Button>
+
+                    <Grid item xs={12}>
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            sx={{mt: 3, mb: 2}}
+                            type="submit"
+                        >
+                            Save Petition
+                        </Button>
+                    </Grid>
                 </Grid>
             </Grid>
         </Box>
-    </Container>);
+    </Container>
+);
 };
 
 export default EditPetition;

@@ -6,22 +6,30 @@ import {
     Typography,
     Button,
     Chip,
-    Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
+    Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Alert, Snackbar, TextField,
 } from "@mui/material";
 
 import CSS from 'csstype';
 import dayjs from "dayjs";
+ import {useUserStore} from "../store";
 
 
 interface ISupportTierProps {
     supportTier: SupportTier
     supporters: Supporter[]
+    petitionId: number
 }
 
 function SupportTierCard(props: ISupportTierProps) {
+    const userToken = useUserStore(state => state.userToken);
     const [supportTier] = React.useState<SupportTier>(props.supportTier);
     const [supporters, setSupporters] = React.useState<Supporter[]>(props.supporters);
+    const [petitionId] = React.useState<number>(props.petitionId);
     const [openDialog, setOpenDialog] = React.useState(false);
+    const [message, setMessage] = React.useState<string>("");
+    const [errorFlag, setErrorFlag] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
+    const [openMessageDialog, setOpenMessageDialog] = React.useState(false);
 
 
     const CardStyles: CSS.Properties = {
@@ -33,8 +41,46 @@ function SupportTierCard(props: ISupportTierProps) {
         setOpenDialog(true);
     }
 
-    return (
-        // Create a card for a support tier with the following:• List of available support tiers, each one with its title, description and cost
+    const addSupporter = () => {
+        let form;
+        if (message) {
+            form = {
+                "supportTierId": supportTier.supportTierId, "message": message
+            }
+        } else {
+            form = {
+                "supportTierId": supportTier.supportTierId
+            }
+        }
+        axios.post(`http://localhost:4941/api/v1/petitions/${petitionId}/supporters`, form, {headers: {'X-Authorization': userToken}})
+            .then((response) => {
+            console.log(response);
+            setOpenMessageDialog(false);
+        }, (error) => {
+            console.log(error);
+            setErrorFlag(true);
+            if (error.response.statusText.includes("Duplicate supporter")) {
+                setErrorMessage("You have already supported this tier");
+            } else if (error.response.statusText.includes("Cannot support your own petition")) {
+                setErrorMessage("You cannot support your own petition");
+            }
+        })
+    }
+
+    return (<>
+        <Snackbar
+            open={errorFlag}
+            autoHideDuration={5000}
+            onClose={() => setErrorFlag(false)}
+        >
+            <Alert
+                severity="error"
+                variant="filled"
+                sx={{width: '100%'}}
+            >
+                {errorMessage}
+            </Alert>
+        </Snackbar>
         <div style={{ display: "inline-block" }}>
             <Card sx={CardStyles}>
                 <CardHeader sx={{ height: "50px" }}
@@ -47,12 +93,24 @@ function SupportTierCard(props: ISupportTierProps) {
                 </CardContent>
                 <CardActions>
                     {/* On click, display modal with supporter information */}
-                    <Typography variant="body2" color="text.secondary">
-                        <Button variant="outlined" onClick={displaySupporters}>View Supporters</Button>
-                    </Typography>
+
+                    <Button variant="outlined" onClick={displaySupporters}>View Supporters</Button>
+                    {userToken && (
+                        <Button variant="outlined" color="success" onClick={()=>setOpenMessageDialog(true)}>Support</Button>
+                    )}
                 </CardActions>
             </Card>
-
+            <Dialog open={openMessageDialog} onClose={() => setOpenMessageDialog(false)}>
+                <DialogTitle>Supporter Message</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1">Add a message to show your support</Typography>
+                    <TextField onChange={(event) => setMessage(event.target.value)} />
+                </DialogContent>
+                <DialogActions>
+                    <Button variant="outlined" onClick={() => setOpenMessageDialog(false)}>Cancel</Button>
+                    <Button variant="outlined" onClick={() => addSupporter()} color="success">Support</Button>
+                </DialogActions>
+            </Dialog>
             <Dialog
                 fullWidth={true}
                 maxWidth={"sm"}
@@ -87,7 +145,7 @@ function SupportTierCard(props: ISupportTierProps) {
                 </DialogActions>
             </Dialog>
         </div>
-    );
+    </>);
 }
 
 export default SupportTierCard

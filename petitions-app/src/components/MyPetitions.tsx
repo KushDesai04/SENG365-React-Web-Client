@@ -1,10 +1,9 @@
 import React from "react";
-import {IconButton, Paper} from "@mui/material";
+import {Grid, IconButton, Paper, Typography} from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import {useUserStore} from "../store";
 import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
-import PetitionsCard from "./PetitionsCard";
 
 import CSS from "csstype";
 import MyPetitionsCard from "./MyPetitionsCard";
@@ -68,25 +67,22 @@ const MyPetitions = () => {
     return (<>
             <Paper elevation={3} style={card}>
                 <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr auto",
-                    alignItems: "center",
-                    position: "relative"
+                    display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", position: "relative"
                 }}>
-                    <h1 style={{gridColumn: "1 / -1", textAlign: "center", margin: 0}}>Petitionary</h1>
-                    <Link to="/createPetition">
-                        <IconButton color="primary" sx={{border: "1px solid", position: "absolute", top: 0, right: 22}}>
-                            <AddIcon/>
-                        </IconButton>
-                    </Link>
+                    <Grid item xs={12}>
+                        <Typography variant="h3" sx={{mt: 2}}>My Petitions</Typography>
+                        <Link to="/createPetition">
+                            <IconButton color="primary" sx={{border: "1px solid", marginLeft: "5px"}}>
+                                <AddIcon fontSize="inherit"/>
+                            </IconButton>
+                        </Link>
+                    </Grid>
                 </div>
 
-                <div style={{display: "inline-block", width: "100%"}}>
+                <div style={{display: "inline-block", width: "100%", marginTop: "15px"}}>
                     {noPetitionsFlag ? "No petitions yet" : petition_rows()}
                 </div>
             </Paper>
-        </>
-    )
-        ;
+        </>);
 }
 export default MyPetitions

@@ -49,7 +49,7 @@ const Navbar = () => {
                         component={Link}
                         to="/petitions"
                     >
-                        Petitions App
+                        Petitionary
                     </Button>
                 </Typography>
                 <Box sx={{display: 'flex', justifyContent: 'center'}}>
@@ -79,7 +79,7 @@ const Navbar = () => {
                         <>
                             <IconButton onClick={handleMenu} color="inherit">
                                 <Avatar alt="Profile Pic" src={imageURL}>
-                                    {user ? user.firstName[0] + user.lastName[0] : ""}
+                                    {user ? user.firstName[0].toUpperCase() + user.lastName[0].toUpperCase() : ""}
                                 </Avatar>
                             </IconButton>
                             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>

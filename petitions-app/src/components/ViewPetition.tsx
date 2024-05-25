@@ -110,8 +110,7 @@ const ViewPetition = () => {
 
         return petition.supportTiers.map((supportTier: SupportTier) => {
             const supporter = supporters.filter((supporter: Supporter) => supporter.supportTierId === supportTier.supportTierId)
-            if (supporters.length <= 0) return null
-            return <SupportTierCard key={supportTier.supportTierId} supportTier={supportTier} supporters={supporter} />
+            return <SupportTierCard key={supportTier.supportTierId} supportTier={supportTier} supporters={supporter} petitionId={petition.petitionId}/>
         })
     }
 
@@ -126,11 +125,6 @@ const ViewPetition = () => {
     }
 
     return (<>
-
-            <Paper elevation={1} style={card} sx={{textAlign: "left"}}>
-                <Button variant="contained" color="primary" href="/petitions" sx={{marginLeft:"15px !important"}}>Back</Button>
-            </Paper>
-
             <Paper elevation={1} style={card}>
                 <h1>Petition</h1>
                     <div style={{display: "inline-block", width: "100%"}}>
@@ -145,13 +139,16 @@ const ViewPetition = () => {
                     </div>
             </Paper>
             <Paper elevation={3} style={card}>
-                <h1>Supporters</h1>
+                <h1>Support Tiers</h1>
                 {petition_support()}
             </Paper>
-            <Paper elevation={1} style={card}>
-                <h1>Similar Petitions</h1>
-                {noSimilarPetitionsFlag ? <Typography color={"error"}>No similar petitions</Typography> : petition_rows()}
-            </Paper>
+            {noSimilarPetitionsFlag ? "" : (
+                <Paper elevation={5} style={card}>
+                    <h1>Similar Petitions</h1>
+                    {petition_rows()}
+                </Paper>
+            )}
+
 
 
         </>

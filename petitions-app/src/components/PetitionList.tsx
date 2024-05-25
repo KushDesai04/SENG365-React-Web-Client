@@ -3,7 +3,7 @@ import React from "react";
 import CSS from 'csstype';
 import {
     Alert,
-    AlertTitle,
+    Box,
     Button,
     FormControl,
     InputLabel,
@@ -13,8 +13,9 @@ import {
     Paper,
     Select,
     SelectChangeEvent,
+    Snackbar,
     TextField,
-    Checkbox
+    Typography
 } from "@mui/material";
 import PetitionsCard from "./PetitionsCard"
 import SearchIcon from '@mui/icons-material/Search';
@@ -40,7 +41,6 @@ const PetitionList = () => {
     const [errorFlag, setErrorFlag] = React.useState(false)
     const [errorMessage, setErrorMessage] = React.useState("")
     const [infoFlag, setInfoFlag] = React.useState(false)
-    const [infoMessage, setInfoMessage] = React.useState("")
     const [petitionStartIndex, setPetitionStartIndex] = React.useState(0)
     const [petitionCount, setPetitionCount] = React.useState<number>(0)
     const [petitionQuery, setPetitionQuery] = React.useState("")
@@ -82,14 +82,13 @@ const PetitionList = () => {
                     setPetitionCount(response.data.count)
                     if (response.data.count === 0) {
                         setInfoFlag(true)
-                        setInfoMessage("No petitions found")
+                        setErrorMessage("No petitions found")
                     } else {
                         setInfoFlag(false)
-                        setInfoMessage("")
                     }
                 }, (error) => {
                     setErrorFlag(true)
-                    setErrorMessage(error.toString())
+                    setErrorMessage(error.response.statusText)
                 })
         }
 
@@ -123,13 +122,23 @@ const PetitionList = () => {
     }
 
     const changeCategory = (event: SelectChangeEvent<typeof petitionCategory>) => {
-        const { target: {value}, } = event;
+        const {target: {value},} = event;
         setPetitionCategory(typeof value === 'string' ? value.split(',') : value,);
     }
 
     const changeSort = (event: SelectChangeEvent<typeof petitionSort>) => {
-        const { target: {value}, } = event;
+        const {target: {value},} = event;
         setPetitionSort(value)
+    }
+
+    const clearFilters = () => {
+        setPetitionQuery("")
+        setEditPetitionQuery("")
+        setPetitionSupportingCost("")
+        setPetitionCategory([])
+        setPetitionSort("CREATED_ASC")
+        // reset search field
+
     }
 
     const petition_rows = () => petitions.map((petition: Petitions) => <PetitionsCard
@@ -139,86 +148,86 @@ const PetitionList = () => {
         padding: "10px", margin: "0", display: "block"
     }
     return (<>
-            <Paper elevation={3} style={card}>
-                <h1>Petitions</h1>
-                <div>
-                    <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-                        <TextField id="outlined-basic" label="Search" variant="outlined" size="small"
-                                   onChange={(event) => editQuery(event.target.value)}/>
-                        <Button variant="outlined" size="large" onClick={() => updateQuery()} style={{height: "40px"}}>
-                            <SearchIcon color="primary" fontSize="medium"/>
-                        </Button>
-                    </div>
-                    <div style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        margin: 10,
-                        width: "100%"
-                    }}>
-                        <TextField id="outlined-basic" label="Max Supporting Cost" variant="outlined" size="small"
-                                   onChange={(event) => changeSupportingCost(event.target.value)}/>
-                    </div>
-                    {/* Categories Filter */}
-                    <div>
-                        <FormControl sx={{m: 1, width: 300}}>
-                            <InputLabel id="category-filter">Categories</InputLabel>
-                            <Select
-                                labelId="category-filter-label"
-                                id="category-filter-select"
-                                multiple
-                                value={petitionCategory}
-                                onChange={changeCategory}
-                                input={<OutlinedInput label="Category"/>}
-                            >
-                                {categories.map((category) => (<MenuItem
-                                    key={category.categoryId}
-                                    value={category.categoryId}
-                                >
-                                    {category.name}
-                                </MenuItem>))}
-                            </Select>
-                        </FormControl>
-                    
-                    {/* Sort By Filter */}
-                    
-                        <FormControl sx={{m: 1, width: 300}}>
-                            <InputLabel id="sort-by">Sort By</InputLabel>
-                            <Select
-                                labelId="sort-by-label"
-                                id="sort-by-select"
-                                value={petitionSort}
-                                onChange={changeSort}
-                                input={<OutlinedInput label="Sort By"/>}
-                            >
-                                {SortOptions.map((option) => (<MenuItem
-                                    key={option.value}
-                                    value={option.value}
-                                >
-                                    {option.label}
-                                </MenuItem>))}
-                            </Select>
-                        </FormControl>
-                    </div>
-                    <div style={{display: "inline-block", width: "100%"}}>
-                        {errorFlag ? <Alert severity="error" style={{display: "flex", justifyContent: "center"}}>
-                            <AlertTitle> Error </AlertTitle>
-                            {errorMessage}
-                        </Alert> : ""}
-                        {infoFlag ? <Alert severity="info" style={{display: "flex", justifyContent: "center"}}>
-                            {infoMessage}
-                        </Alert> : ""}
-                        {petition_rows()}
-                    </div>
-                    <div>
-                        <Pagination showFirstButton showLastButton count={Math.ceil(petitionCount / 10)}
-                                    style={{display: "inline-block"}} size="large"
-                                    onChange={(event, page) => setPetitionStartIndex((page - 1) * 10)}/>
-                    </div>
-                </div>
-            </Paper>
-        </>
+        <Snackbar open={errorFlag || infoFlag} autoHideDuration={6000} onClose={()=>{setErrorFlag(false); setInfoFlag(false)}}>
+            <Alert severity={errorFlag ? "error" : "info"} variant="filled" sx={{width: '100%'}}>
+                {errorMessage}
+            </Alert>
+        </Snackbar>
+        <Paper elevation={3} style={card}>
+            <h1>Petitions</h1>
+            <Box m={2}>
+                <TextField
+                    id="outlined-basic"
+                    label="Search"
+                    variant="outlined"
+                    size="small"
+                    value={editPetitionQuery}
+                    onChange={(event) => editQuery(event.target.value)}
+                />
+                <Button variant="outlined" size="large" onClick={() => updateQuery()} style={{height: "40px"}}>
+                    <SearchIcon color="primary" fontSize="medium"/>
+                </Button>
 
-    )
+            </Box>
+            <Box style={{display: 'flex', justifyContent: 'center', width: '100%', flexWrap: 'wrap', gap: '10px'}}>
+
+                <TextField
+                    id="outlined-basic"
+                    label="Max Supporting Cost"
+                    variant="outlined"
+                    type="number"
+                    value={petitionSupportingCost}
+                    onChange={(e) => changeSupportingCost(e.target.value)}
+                    sx={{marginBottom: 2}}
+                />
+                <FormControl sx={{width: 300}}>
+                    <InputLabel id="category-filter">Categories</InputLabel>
+                    <Select
+                        labelId="category-filter-label"
+                        id="category-filter-select"
+                        multiple
+                        value={petitionCategory}
+                        onChange={changeCategory}
+                        input={<OutlinedInput label="Category"/>}
+                    >
+                        {categories.map((category) => (<MenuItem key={category.categoryId} value={category.categoryId}>
+                            {category.name}
+                        </MenuItem>))}
+                    </Select>
+                </FormControl>
+                <FormControl sx={{width: 300}}>
+                    <InputLabel id="sort-by">Sort By</InputLabel>
+                    <Select
+                        labelId="sort-by-label"
+                        id="sort-by-select"
+                        value={petitionSort}
+                        onChange={changeSort}
+                        input={<OutlinedInput label="Sort By"/>}
+                    >
+                        {SortOptions.map((option) => (<MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                        </MenuItem>))}
+                    </Select>
+                </FormControl>
+            </Box>
+            <Button variant="outlined" color="error" size="medium" onClick={() => clearFilters()}
+                    style={{height: "40px", marginLeft: 2}}>
+                <Typography fontSize="medium">Clear Filters</Typography>
+            </Button>
+            <div style={{display: 'inline-block', width: '100%'}}>
+                {petition_rows()}
+            </div>
+            <div>
+                <Pagination
+                    showFirstButton
+                    showLastButton
+                    count={Math.ceil(petitionCount / 10)}
+                    style={{display: "inline-block"}}
+                    size="large"
+                    onChange={(event, page) => setPetitionStartIndex((page - 1) * 10)}
+                />
+            </div>
+        </Paper>
+    </>)
 }
 export default PetitionList

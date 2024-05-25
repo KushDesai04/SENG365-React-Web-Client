@@ -2,10 +2,12 @@ import axios from 'axios';
 import React from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import {Button, CssBaseline, Grid, TextField, Typography} from "@mui/material";
+import {Avatar, Button, CssBaseline, Grid, IconButton, styled, TextField, Typography} from "@mui/material";
 import {Link, useNavigate} from "react-router-dom";
 import {useUserStore} from "../store";
 import {wait} from "@testing-library/user-event/dist/utils";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const Register = () => {
     const setUserId = useUserStore(state => state.setUserId)
@@ -18,7 +20,23 @@ const Register = () => {
     const [imageError, setImageError] = React.useState(false);
     const [contentType, setContentType] = React.useState('');
     const [image, setImage] = React.useState<File | null>(null);
+    const [selectedFile, setSelectedFile] = React.useState<File>()
+    const [preview, setPreview] = React.useState<string>("")
     const navigate = useNavigate();
+
+
+    React.useEffect(() => {
+        if (!selectedFile) {
+            setPreview("")
+            return
+        }
+
+        const objectUrl = URL.createObjectURL(selectedFile)
+        setPreview(objectUrl)
+
+        // free memory when ever this component is unmounted
+        return () => URL.revokeObjectURL(objectUrl)
+    }, [selectedFile])
 
     const submit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -88,6 +106,7 @@ const Register = () => {
 
             setContentType(contentType);
             setImage(file)
+            setSelectedFile(file)
         } else {
             setImageError(!file);
         }
@@ -110,6 +129,25 @@ const Register = () => {
             }
         }
     };
+    const OverlayIconContainer = styled(Box)({
+        position: 'absolute',
+        bottom: 0,
+        right: 1,
+        backgroundColor: 'rgba(25, 118, 210, 1)',
+        padding: '4px',
+        borderRadius: '50%',
+        cursor: 'pointer',
+    });
+
+    const OverlayDeleteIconContainer = styled(Box)({
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        backgroundColor: 'rgba(210, 0, 0, 1)',
+        padding: '4px',
+        borderRadius: '50%',
+        cursor: 'pointer',
+    });
 
     return (
 
@@ -188,15 +226,49 @@ const Register = () => {
                             </Typography>
                         </Grid>
                     </Grid>
-                    <Button variant="contained" component="label">
-                        Upload Image
-                        <input
-                            type="file"
-                            accept="image/png, image/jpeg, image/gif"
-                            hidden
-                            onChange={e => chooseImage(e.target.files?.[0] || null)}
-                        />
-                    </Button>
+                    <Box position="relative" display="inline-block">
+                        <Grid item xs={12} sx={{display: "flex", justifyContent:"center", marginTop: "10px"}}>
+                            <Avatar src={preview} sx={{width: 150, height: 150}}>
+                                {null}
+                            </Avatar>
+                        </Grid>
+
+                        <OverlayIconContainer>
+                            <label htmlFor="image-upload">
+                                <input
+                                    id="image-upload"
+                                    name="image-upload"
+                                    type="file"
+                                    style={{display: 'none'}}
+                                    onChange={(event) => chooseImage(event.target.files ? event.target.files[0] : null)}
+                                />
+                                <IconButton component="span">
+                                    <EditIcon sx={{color: 'white'}}/>
+                                </IconButton>
+                            </label>
+                        </OverlayIconContainer>
+                        {preview && ( // Only show the remove button if there's a profile picture
+                            <OverlayDeleteIconContainer>
+                                <IconButton component="span" size="small" onClick={()=> setPreview("")}>
+                                    <DeleteIcon style={{color: 'white'}}/>
+                                </IconButton>
+                            </OverlayDeleteIconContainer>)}
+                    </Box>
+                    <Box>
+                        <label htmlFor="image-upload">
+                            <input
+                                id="image-upload"
+                                name="image-upload"
+                                type="file"
+                                style={{display: 'none'}}
+                                onChange={(event) => chooseImage(event.target.files ? event.target.files[0] : null)}
+                            />
+                            <IconButton component="span">
+                                <EditIcon sx={{color: 'white'}}/>
+                            </IconButton>
+                        </label>
+                    </Box>
+
                     <Button
                         fullWidth
                         variant="contained"

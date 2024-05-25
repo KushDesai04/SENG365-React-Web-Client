@@ -41,6 +41,12 @@ function PetitionsCard(props: IPetitionProps) {
     const [categoryId] = React.useState<number>(petition.categoryId);
     const [openDialog, setOpenDialog] = React.useState(false);
     const [open, setOpen] = React.useState(false);
+    const [petitionImageURL, setPetitionImageURL] = React.useState<string>("");
+    const [infoFlag, setInfoFlag] = React.useState(false);
+
+    React.useEffect(() => {
+        setPetitionImageURL(`http://localhost:4941/api/v1/petitions/${petition.petitionId}/image`)
+    }, [])
 
     const petitionCardStyles: CSS.Properties = {
         display: "inline-block", width: "400px", margin: "10px", padding: "0px"
@@ -60,6 +66,7 @@ function PetitionsCard(props: IPetitionProps) {
         // For example:
         axios.delete(`http://localhost:4941/api/v1/petitions/${petition.petitionId}`, {headers: {'X-Authorization': userToken}})
             .then(() => {
+                setInfoFlag(true)
                 window.location.reload();
             })
             .catch(error => {
@@ -82,12 +89,24 @@ function PetitionsCard(props: IPetitionProps) {
     }, []);
 
     return (<>
-
+            <Snackbar
+                open={infoFlag}
+                autoHideDuration={6000}
+                onClose={()=>setInfoFlag(false)}
+            >
+                <Alert
+                    severity="error"
+                    variant="filled"
+                    sx={{width: '100%'}}
+                >
+                    Deleted Successfully
+                </Alert>
+            </Snackbar>
             <Card sx={petitionCardStyles}>
                 <CardActionArea component={Link} to={'/petitions/' + petition.petitionId}>
                     <CardHeader style={{textAlign: "left", height: "50px"}}
                                 avatar={<Avatar
-                                    src={"http://localhost:4941/api/v1/users/" + petition.ownerId + "/image"}
+                                    src={petitionImageURL}
                                     aria-label="user profile pic">
                                     {petition.ownerFirstName[0] + petition.ownerLastName[0]}
                                 </Avatar>}

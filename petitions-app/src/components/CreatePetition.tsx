@@ -6,17 +6,18 @@ import {
     Button,
     CssBaseline,
     FormControl,
-    Grid,
+    Grid, IconButton,
     InputLabel,
     MenuItem,
     OutlinedInput,
-    Select,
+    Select, styled,
     TextField,
     Typography
 } from "@mui/material";
 import {Link, useNavigate} from "react-router-dom";
 import {Category} from "@mui/icons-material";
 import {useUserStore} from "../store";
+import EditIcon from "@mui/icons-material/Edit";
 
 const CreatePetition = () => {
     const userToken = useUserStore(state => state.userToken);
@@ -32,10 +33,16 @@ const CreatePetition = () => {
     const [errorMessage, setErrorMessage] = React.useState("");
     const [image, setImage] = React.useState<File | null>(null);
     const [contentType, setContentType] = React.useState<string>("")
-
     const navigate = useNavigate();
+    const [selectedFile, setSelectedFile] = React.useState<File>()
+    const [preview, setPreview] = React.useState<string>("")
+
+
 
     React.useEffect(() => {
+        if (!userToken) {
+            navigate('/petitions');
+        }
         const getCategories = () => {
             axios.get('http://localhost:4941/api/v1/petitions/categories')
                 .then((response) => {
@@ -47,7 +54,17 @@ const CreatePetition = () => {
                 })
         }
         getCategories()
-    }, [])
+        if (!selectedFile) {
+            setPreview("")
+            return
+        }
+
+        const objectUrl = URL.createObjectURL(selectedFile)
+        setPreview(objectUrl)
+
+        // free memory when ever this component is unmounted
+        return () => URL.revokeObjectURL(objectUrl)
+    }, [selectedFile])
 
     const selectCategoryChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
         setSelectedCategory(event.target.value);
@@ -120,6 +137,7 @@ const CreatePetition = () => {
 
             setContentType(contentType)
             setImage(file)
+            setSelectedFile(file)
         } else {
             setImageError(!file);
         }
@@ -143,6 +161,16 @@ const CreatePetition = () => {
 
     }
 
+    const OverlayIconContainer = styled(Box)({
+        position: 'absolute',
+        bottom: 10,
+        right: 0,
+        backgroundColor: 'rgba(25, 118, 210, 1)',
+        padding: '4px',
+        borderRadius: '50%',
+        cursor: 'pointer',
+    });
+
     return (
         <Container component="main" maxWidth="xs">
             <CssBaseline/>
@@ -158,6 +186,57 @@ const CreatePetition = () => {
                     Create Petition
                 </Typography>
                 <Grid component="form" noValidate onSubmit={submit} sx={{mt: 3}}>
+                    <Grid item xs={12}>
+                        <Box position="relative" display="inline-block">
+                            {preview ? (<>
+                                <Box
+                                    component="img"
+                                    src={preview}
+                                    alt="Petition"
+                                    sx={{
+                                        width: "100%",
+                                        objectFit: 'cover',
+                                        borderRadius: '8px',
+                                    }}
+                                />
+                                <OverlayIconContainer>
+                                    <label htmlFor="image-upload">
+                                        <input
+                                            id="image-upload"
+                                            name="image-upload"
+                                            type="file"
+                                            style={{display: 'none'}}
+                                            onChange={(event) => chooseImage(event.target.files ? event.target.files[0] : null)}
+                                        />
+                                        <IconButton component="span">
+                                            <EditIcon sx={{color: 'white'}}/>
+                                        </IconButton>
+                                    </label>
+                                </OverlayIconContainer>
+                                </>
+                            ) : <Grid item xs={12} sx={{margin:1}}>
+                                <Box>
+                                    <Button variant="contained" component="label">
+                                        Upload Image
+                                        <input
+                                            type="file"
+                                            accept="image/png, image/jpeg, image/gif"
+                                            hidden
+                                            onChange={e => chooseImage(e.target.files?.[0] || null)}
+                                        />
+                                    </Button>
+                                    <br/>
+                                    <Typography variant="overline" color="error" align="left">
+                                        {imageError ? "Image must be of type .jpg/.png/.gif" : ""}
+                                    </Typography>
+                                </Box>
+                            </Grid>}
+
+                        </Box>
+                        {imageError && (
+                            <><br/><Typography variant="overline"color="error">Only PNG, JPEG, and GIF files are allowed</Typography></>
+                        )}
+                    </Grid>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField
@@ -242,23 +321,7 @@ const CreatePetition = () => {
                                 </Button>
                             </Grid>
                         )}
-                        <Grid item xs={12}>
-                            <Box>
-                                <Button variant="contained" component="label">
-                                    Upload Image
-                                    <input
-                                        type="file"
-                                        accept="image/png, image/jpeg, image/gif"
-                                        hidden
-                                        onChange={e => chooseImage(e.target.files?.[0] || null)}
-                                    />
-                                </Button>
-                                <br/>
-                                <Typography variant="overline" color="error" align="left">
-                                    {imageError ? "Image must be of type .jpg/.png/.gif" : ""}
-                                </Typography>
-                            </Box>
-                        </Grid>
+
                         <Button
                             fullWidth
                             variant="contained"
