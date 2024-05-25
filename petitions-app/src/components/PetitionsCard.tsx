@@ -66,12 +66,12 @@ function PetitionsCard(props: IPetitionProps) {
                     <Typography variant="h6">
                         {petition.title}
                     </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Cost: {petition.supportingCost}
+                    </Typography>
                 </CardContent>
                 <CardActions>
                     <Chip label={category} variant="filled" sx={{backgroundColor: numberToRGB(categoryId), color:"white", fontWeight: "bold"}}/>
-                    <Typography variant="body2" color="text.secondary" sx={{marginLeft: "auto !important"}}>
-                        Cost: {petition.supportingCost}
-                    </Typography>
                 </CardActions>
             </CardActionArea>
         </Card>

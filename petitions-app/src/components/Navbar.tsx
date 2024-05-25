@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Avatar, Menu, MenuItem, IconButton } from '@mui/material';
+import {AppBar, Avatar, Box, Button, IconButton, Menu, MenuItem, Toolbar, Typography} from '@mui/material';
 import {Link, useNavigate} from 'react-router-dom';
 import {useUserStore} from "../store";
 import axios from "axios";
@@ -39,22 +39,40 @@ const Navbar: React.FC = () => {
 
     return (
         <AppBar position="static">
-            <Toolbar>
-                <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: "left" }}>
-                    <Button sx={{"&:hover":{background: "rgba(255, 255, 255, 0.3)"}, fontSize: "1rem"}} color="inherit" component={Link} to="/petitions">
+            <Toolbar sx={{display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center'}}>
+                <Typography variant="h6" component="div" sx={{textAlign: "left"}}>
+                    <Button
+                        sx={{"&:hover": {background: "rgba(255, 255, 255, 0.3)"}, fontSize: "1rem"}}
+                        color="inherit"
+                        component={Link}
+                        to="/petitions"
+                    >
                         Petitions App
                     </Button>
                 </Typography>
-                <Box sx={{ flexGrow: 1, display: "flex" }}>
-                    <Button variant="outlined" sx={{margin: "5px", "&:hover":{background: "rgba(255, 255, 255, 0.3)"}}} color="inherit" component={Link} to="/petitions">
+                <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                    <Button
+                        variant="outlined"
+                        sx={{margin: "5px", "&:hover": {background: "rgba(255, 255, 255, 0.3)"}}}
+                        color="inherit"
+                        component={Link}
+                        to="/petitions"
+                    >
                         Petitions
                     </Button>
-                    <Button variant="outlined" sx={{margin: "5px", "&:hover":{background: "rgba(255, 255, 255, 0.3)"}}} color="inherit" component={Link} to="/petitions">
-                        My Petitions
-                    </Button>
+                    {userToken && (
+                        <Button
+                            variant="outlined"
+                            sx={{margin: "5px", "&:hover": {background: "rgba(255, 255, 255, 0.3)"}}}
+                            color="inherit"
+                            component={Link}
+                            to="/mypetitions"
+                        >
+                            My Petitions
+                        </Button>
+                    )}
                 </Box>
-                <Box>
-
+                <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
                     {userToken ? (
                         <>
                             <IconButton onClick={handleMenu} color="inherit">
@@ -62,21 +80,29 @@ const Navbar: React.FC = () => {
                                     {user ? user.firstName[0] + user.lastName[0] : ""}
                                 </Avatar>
                             </IconButton>
-                            <Menu
-                                anchorEl={anchorEl}
-                                open={Boolean(anchorEl)}
-                                onClose={handleClose}
-                            >
-                                <MenuItem onClick={()=> navigate("/profile")}>Profile</MenuItem>
+                            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+                                <MenuItem onClick={() => navigate("/profile")}>Profile</MenuItem>
                                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
                             </Menu>
                         </>
                     ) : (
                         <>
-                            <Button variant="outlined" sx={{margin: "5px", "&:hover":{background: "rgba(255, 255, 255, 0.3)"}}} color="inherit" component={Link} to="/login">
+                            <Button
+                                variant="outlined"
+                                sx={{margin: "5px", "&:hover": {background: "rgba(255, 255, 255, 0.3)"}}}
+                                color="inherit"
+                                component={Link}
+                                to="/login"
+                            >
                                 Login
                             </Button>
-                            <Button variant="outlined" sx={{margin: "5px", "&:hover":{background: "rgba(255, 255, 255, 0.3)"}}} color="inherit" component={Link} to="/register">
+                            <Button
+                                variant="outlined"
+                                sx={{margin: "5px", "&:hover": {background: "rgba(255, 255, 255, 0.3)"}}}
+                                color="inherit"
+                                component={Link}
+                                to="/register"
+                            >
                                 Register
                             </Button>
                         </>
@@ -84,7 +110,7 @@ const Navbar: React.FC = () => {
                 </Box>
             </Toolbar>
         </AppBar>
-    );
-};
+    )
+}
 
 export default Navbar;

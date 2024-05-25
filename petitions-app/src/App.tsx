@@ -6,6 +6,8 @@ import ViewPetition from "./components/ViewPetition";
 import Layout from "./components/Layout";
 import Register from "./components/Register";
 import Login from "./components/Login";
+import MyPetitions from "./components/MyPetitions";
+import CreatePetition from "./components/CreatePetition";
 
 function App() {
   return (
@@ -19,7 +21,8 @@ function App() {
                   <Route path="/petitions/:id" element={<ViewPetition />}/>
                   <Route path="/register" element={<Register />}/>
                   <Route path="/login" element={<Login />}/>
-
+                  <Route path="/mypetitions" element={<MyPetitions />}/>
+                  <Route path="/createpetition" element={<CreatePetition />}/>
               </Routes>
             </div>
               </Layout>

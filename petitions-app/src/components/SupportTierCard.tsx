@@ -48,7 +48,7 @@ function SupportTierCard(props: ISupportTierProps) {
                 <CardActions>
                     {/* On click, display modal with supporter information */}
                     <Typography variant="body2" color="text.secondary">
-                        <Button onClick={displaySupporters}>View Supporters</Button>
+                        <Button variant="outlined" onClick={displaySupporters}>View Supporters</Button>
                     </Typography>
                 </CardActions>
             </Card>
@@ -83,7 +83,7 @@ function SupportTierCard(props: ISupportTierProps) {
                     {supporters.length === 0 && <DialogContentText>No supporters found</DialogContentText>}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenDialog(false)}>Close</Button>
+                    <Button variant="outlined" onClick={() => setOpenDialog(false)}>Close</Button>
                 </DialogActions>
             </Dialog>
         </div>
