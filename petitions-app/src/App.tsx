@@ -22,7 +22,7 @@ function App() {
               <Routes>
                   <Route path="/" element={<Navigate to="/petitions" />} />
                   <Route path="/petitions" element={<PetitionList />}/>
-                  <Route path="/petitions/:id" element={<ViewPetition />}/>
+                  <Route path="/petitions/:petitionId" element={<ViewPetition />}/>
                   <Route path="/register" element={<Register />}/>
                   <Route path="/login" element={<Login />}/>
                   <Route path="/mypetitions" element={<MyPetitions />}/>

@@ -1,158 +1,283 @@
-import axios from 'axios';
-import React from "react";
-import CSS from 'csstype';
+import { useState, useEffect } from 'react';
 import {
     Alert,
-    AlertTitle,
+    Avatar,
+    Box,
     Button,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    OutlinedInput,
-    Pagination,
-    Paper,
-    Select,
-    SelectChangeEvent,
-    TextField,
     Card,
-    CardContent, CardHeader, CardActionArea,
+    CardActionArea,
+    CardActions,
+    CardContent,
+    CardHeader,
     CardMedia,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+    Paper,
+    Snackbar,
+    TextField,
     Typography,
-} from "@mui/material";
-import PetitionCard from "./PetitionCard"
-import { request } from 'http';
-import { useParams } from 'react-router-dom';
-import SupportTierCard from './SupportTierCard';
-import PetitionsCard from "./PetitionsCard"
+} from '@mui/material';
+import { Link, useParams } from 'react-router-dom';
+import axios from 'axios';
+import dayjs from 'dayjs';
+import { styled } from '@mui/system';
+import { useUserStore } from '../store';
+import { useNavigate } from 'react-router-dom';
+import CSS from 'csstype';
+import PetitionCard from './PetitionCard';
+import PetitionsCard from './PetitionsCard';
+
 
 const ViewPetition = () => {
-    const {id} = useParams<{id: string}>()
-    const [petition, setPetition] = React.useState<Petition>()
-    const [petitionToDisplay, setPetitionToDisplay] = React.useState<JSX.Element>()
-    const [supporters, setSupporters] = React.useState<Supporter[]>([])
-    const [errorFlag, setErrorFlag] = React.useState(false)
-    const [errorMessage, setErrorMessage] = React.useState("")
-    const [infoFlag, setInfoFlag] = React.useState(false)
-    const [infoMessage, setInfoMessage] = React.useState("")
-    const [similarPetitions, setSimilarPetitions] = React.useState<Petitions[]>([])
-    const [noSimilarPetitionsFlag, setNoSimilarPetitionsFlag] = React.useState(false)
+    const userToken = useUserStore(state => state.userToken);
+    const { petitionId } = useParams<{ petitionId: string }>();
+    const [petition, setPetition] = useState<Petition | null>(null);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [supporters, setSupporters] = useState<Supporter[]>([]);
+    const [currentSupportTier, setCurrentSupportTier] = useState<number | null>(null);
+    const [similarPetitions, setSimilarPetitions] = useState<Petitions[]>([]);
+    const [message, setMessage] = useState<string>('');
+    const [supportDialog, setSupportDialog] = useState(false);
+    const [tierSupport, setTierSupport] = useState<SupportTier | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [errorFlag, setErrorFlag] = useState<boolean>(false);
+    const navigate = useNavigate();
 
-
-    React.useEffect(() => {
-        const getPetition = () => {
-            axios.get('http://localhost:4941/api/v1/petitions/' + id)
-                .then((response) => {
-                    setErrorFlag(false)
-                    setErrorMessage("")
-                    setPetition(response.data)
-                    setPetitionToDisplay(<PetitionCard key={response.data.petitionId + response.data.title} petition={response.data} />)
-                    if (response.data.count === 0) {
-                        setInfoFlag(true)
-                        setInfoMessage("No petitions found")
-                    } else {
-                        setInfoFlag(false)
-                        setInfoMessage("")
-                    }
-                    // Call getSimilarPetitions after setting the petition data
-                    getSimilarPetitions(response.data);
-                }, (error) => {
-                    setErrorFlag(true)
-                    setErrorMessage(error.toString())
-                })
+    useEffect(() => {
+        if (!userToken) {
+            navigate('/login');
+            return;
         }
-        const getSupporters = () => {
-            axios.get('http://localhost:4941/api/v1/petitions/' + id + '/supporters')
-                .then((response) => {
-                    console.log(response.data)
-                    setSupporters(response.data)
-                }, (error) => {
-                    setErrorFlag(true)
-                    setErrorMessage(error.toString())
-                })
-        }
-        const getSimilarPetitions = (petition: Petition) => {
-            const ownerIdRequest = axios.get(`http://localhost:4941/api/v1/petitions?ownerId=${petition.ownerId}`);
-            const categoryIdsRequest = axios.get(`http://localhost:4941/api/v1/petitions?categoryIds=${petition.categoryId}`);
+        axios.get(`http://localhost:4941/api/v1/petitions/${petitionId}`)
+            .then((response) => {
+                setPetition(response.data);
+                fetchSimilarPetitions(response.data);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }, [petitionId]);
 
-            Promise.all([ownerIdRequest, categoryIdsRequest])
-                .then(([ownerIdResponse, categoryIdsResponse]) => {
-                    setErrorFlag(false);
-                    setErrorMessage("");
+    const fetchSimilarPetitions = (petition: Petition) => {
+        const fetchByOwner = axios.get(`http://localhost:4941/api/v1/petitions?ownerId=${petition.ownerId}`);
+        const fetchByCategory = axios.get(`http://localhost:4941/api/v1/petitions?categoryIds=${petition.categoryId}`);
 
-                    const ownerIdPetitions = ownerIdResponse.data.petitions;
-                    const categoryIdsPetitions = categoryIdsResponse.data.petitions;
+        Promise.all([fetchByOwner, fetchByCategory])
+            .then(([ownerResponse, categoryResponse]) => {
+                const ownerPetitions = ownerResponse.data.petitions;
+                const categoryPetitions = categoryResponse.data.petitions;
 
-                    // Combine the results from both API calls
-                    const allPetitions = [...ownerIdPetitions, ...categoryIdsPetitions];
+                const combinedPetitions = [...ownerPetitions, ...categoryPetitions];
+                const uniquePetitions = Array.from(new Set(combinedPetitions.map(p => p.petitionId)))
+                    .map(id => combinedPetitions.find(p => p.petitionId === id))
+                    .filter(p => p.petitionId !== petition.petitionId);
 
-                    // Remove duplicates and the current petition
-                    const filteredSimilarPetitions = Array.from(new Set(allPetitions.filter((p: Petitions) => p.petitionId !== petition.petitionId)));
+                setSimilarPetitions(uniquePetitions);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };
 
-                    setSimilarPetitions(filteredSimilarPetitions);
+    const handleDialogOpen = (supportTier: SupportTier) => {
+        setCurrentSupportTier(supportTier.supportTierId);
+        axios.get(`http://localhost:4941/api/v1/petitions/${petitionId}/supporters`)
+            .then((response) => {
+                setSupporters(response.data);
+                setOpenDialog(true);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };
 
-                    if (filteredSimilarPetitions.length === 0) {
-                        setNoSimilarPetitionsFlag(true);
-                    } else {
-                        setNoSimilarPetitionsFlag(false);
-                    }
-                })
-                .catch((error) => {
-                    setErrorFlag(true);
-                    setErrorMessage(error.toString());
-                });
-        };
-        getSupporters()
-        getPetition()
-    }, [id])
+    const handleDialogClose = () => {
+        setOpenDialog(false);
+        setSupporters([]);
+        setCurrentSupportTier(null);
+    };
 
-    const petition_support = () => {
-        if (!petition) return null
+    const sortedSupporters = (supporters: Supporter[]) =>
+        supporters.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-        return petition.supportTiers.map((supportTier: SupportTier) => {
-            const supporter = supporters.filter((supporter: Supporter) => supporter.supportTierId === supportTier.supportTierId)
-            return <SupportTierCard key={supportTier.supportTierId} supportTier={supportTier} supporters={supporter} petitionId={petition.petitionId}/>
-        })
+    if (!petition) {
+        return <div>Loading...</div>;
     }
 
+    const filteredSupporters = currentSupportTier
+        ? supporters.filter(supporter => supporter.supportTierId === currentSupportTier)
+        : [];
 
+    const sortedFilteredSupporters = sortedSupporters(filteredSupporters);
+    const setTierToSupport = (supportTier: SupportTier) => {
+        setSupportDialog(true);
+        setTierSupport(supportTier);
+    }
 
-    const petition_rows = () => similarPetitions.map((similarPet: Petitions) => <PetitionsCard
-        key={similarPet.petitionId + similarPet.title} petition={similarPet}
-    />)
+    const addSupporter = () => {
+        let form;
+        if (tierSupport) {
+            const supportTier = tierSupport;
+            if (message) {
+                form = {
+                    "supportTierId": supportTier.supportTierId,
+                    "message": message
+                }
+            } else {
+                form = {
+                    "supportTierId": supportTier.supportTierId
+                }
+            }
+            axios.post(`http://localhost:4941/api/v1/petitions/${petitionId}/supporters`, form, { headers: { 'X-Authorization': userToken || '' } })
+                .then(() => {
+                    axios.get(`http://localhost:4941/api/v1/petitions/${petitionId}`)
+                        .then((response) => {
+                            setSupportDialog(false);
+                            setMessage("")
+                        })
+                        .catch((error) => {
+                            console.error(error);
+                        });
+                })
+                .catch((error) => {
+                    setErrorMessage(error.response.statusText)
+                    setErrorFlag(true)
+                });
+        }
+    }
+
+    const CardStyles: CSS.Properties = {
+        display: "inline-block",
+        width: "400px",
+        margin: "10px",
+        padding: "0px"
+    };
 
     const card: CSS.Properties = {
         padding: "10px", margin: "0", display: "block"
     }
 
-    return (<>
-            <Paper elevation={1} style={card}>
-                <h1>Petition</h1>
-                    <div style={{display: "inline-block", width: "100%"}}>
-                        {errorFlag ? <Alert severity="error" style={{display: "flex", justifyContent: "center"}}>
-                            <AlertTitle> Error </AlertTitle>
-                            {errorMessage}
-                        </Alert> : ""}
-                        {infoFlag ? <Alert severity="info" style={{display: "flex", justifyContent: "center"}}>
-                            {infoMessage}
-                        </Alert> : ""}
-                        {petitionToDisplay}
-                    </div>
+    const petition_rows = () => similarPetitions.map((similarPet: Petitions) => <PetitionsCard
+        key={similarPet.petitionId + similarPet.title} petition={similarPet}
+    />)
+
+    return (
+        <>
+            <Snackbar
+                open={errorFlag}
+                autoHideDuration={5000}
+                onClose={() => setErrorFlag(false)}
+            >
+                <Alert
+                    severity="error"
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {errorMessage}
+                </Alert>
+            </Snackbar>
+    
+            <Paper elevation={5} style={card}>
+                {<PetitionCard key={petition.petitionId + petition.title} petition={petition} />}
+                <Typography variant="h6">Support Tiers</Typography>
             </Paper>
-            <Paper elevation={3} style={card}>
-                <h1>Support Tiers</h1>
-                {petition_support()}
-            </Paper>
-            {noSimilarPetitionsFlag ? "" : (
+            <Paper>
+                {petition.supportTiers.map((supportTier: SupportTier) => (
+                    <Card sx={CardStyles}>
+                        <CardHeader sx={{ height: "50px" }}
+                            title={supportTier.title} />
+                        <CardContent sx={{ height: "100px" }}>
+                            <Chip label={"$ " + supportTier.cost} />
+                            <Typography variant="body2" color="text.primary" sx={{ margin: "5% !important" }}>
+                                {supportTier.description}
+                            </Typography>
+                        </CardContent>
+                        <CardActions>
+                            <Button variant="outlined" onClick={()=>handleDialogOpen(supportTier)}>View Supporters</Button>
+                            {userToken && (
+                                <Button variant="outlined" color="success" onClick={() => setTierToSupport(supportTier)}>Support</Button>
+                            )}
+                        </CardActions>
+                    </Card>
+                ))}
+                <Dialog open={supportDialog} onClose={() => setSupportDialog(false)}>
+                    <DialogTitle>Support Petition</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            label="Message"
+                            variant="outlined"
+                            fullWidth
+                            multiline
+                            rows={4}
+                            value={message}
+                            onChange={e => setMessage(e.target.value)}
+                            sx={{ marginBottom: 2 }}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setSupportDialog(false)}>Cancel</Button>
+                        <Button onClick={() => addSupporter()} color="success">Support</Button>
+                    </DialogActions>
+                </Dialog>
+    
+                <Dialog
+                    fullWidth
+                    maxWidth="sm"
+                    open={openDialog}
+                    onClose={handleDialogClose}
+                    aria-labelledby="supporters-dialog-title"
+                    aria-describedby="supporters-dialog-description"
+                >
+                    <DialogTitle id="supporters-dialog-title">Supporters</DialogTitle>
+                    <DialogContent>
+                        {sortedFilteredSupporters.length > 0 ? (
+                            <List>
+                                {sortedFilteredSupporters.map((supporter) => (
+                                    <ListItem key={supporter.supportId} alignItems="flex-start">
+                                        <ListItemAvatar>
+                                            <Avatar src={`http://localhost:4941/api/v1/users/${supporter.supporterId}/image`} />
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={`${supporter.supporterFirstName} ${supporter.supporterLastName}`}
+                                            secondary={
+                                                <>
+                                                    <Typography component="span" variant="body2" color="textPrimary">
+                                                        {supporter.message || 'No message'}
+                                                    </Typography>
+                                                    <br />
+                                                    {`Supporting Since: ${dayjs(supporter.timestamp).format('hh:mm DD/MM/YYYY')}`}
+                                                </>
+                                            }
+                                        />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        ) : (
+                            <DialogContentText>No supporters found</DialogContentText>
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleDialogClose} color="primary">
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+                        </Paper>
+                {similarPetitions.length === 0 ? "" : (
                 <Paper elevation={5} style={card}>
                     <h1>Similar Petitions</h1>
                     {petition_rows()}
                 </Paper>
             )}
-
-
-
         </>
-
-    )
-}
-export default ViewPetition
+    );
+}                   
+export default ViewPetition;   

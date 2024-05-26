@@ -87,7 +87,11 @@ const PetitionList = () => {
                     }
                 }, (error) => {
                     setErrorFlag(true)
-                    setErrorMessage(error.response.statusText)
+                    if (error.response.statusText.includes("must match")) {
+                        setErrorMessage("Please enter a valid supporting cost")
+                    } else {
+                        setErrorMessage(error.response.statusText)
+                    }
                 })
         }
 
