@@ -43,6 +43,7 @@ function PetitionsCard(props: IPetitionProps) {
     const [open, setOpen] = React.useState(false);
     const [petitionImageURL, setPetitionImageURL] = React.useState<string>("");
     const [infoFlag, setInfoFlag] = React.useState(false);
+    const [infoMessage, setInfoMessage] = React.useState<string>("");
 
     React.useEffect(() => {
         setPetitionImageURL(`http://localhost:4941/api/v1/petitions/${petition.petitionId}/image`)
@@ -67,12 +68,16 @@ function PetitionsCard(props: IPetitionProps) {
         axios.delete(`http://localhost:4941/api/v1/petitions/${petition.petitionId}`, {headers: {'X-Authorization': userToken}})
             .then(() => {
                 setInfoFlag(true)
+                setInfoMessage("Deleted petition successfully")
                 window.location.reload();
             })
             .catch(error => {
                 console.log(error);
                 setOpen(true);
                 setOpenDialog(false);
+                setInfoFlag(true)
+                setInfoMessage("Cannot delete a petition with active supporters")
+
             });
     };
     React.useEffect(() => {
@@ -99,7 +104,7 @@ function PetitionsCard(props: IPetitionProps) {
                     variant="filled"
                     sx={{width: '100%'}}
                 >
-                    Deleted Successfully
+                    {infoMessage}
                 </Alert>
             </Snackbar>
             <Card sx={petitionCardStyles}>

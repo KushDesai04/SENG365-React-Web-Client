@@ -8,6 +8,9 @@ import {
     Button,
     CssBaseline,
     Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     FormControl,
     Grid,
     IconButton,
@@ -48,6 +51,7 @@ const EditPetition = () => {
     const [successSnackboxOpen, setSuccessSnackboxOpen] = React.useState<boolean>(false);
     const [errorSnackboxOpen, setErrorSnackboxOpen] = React.useState<boolean>(false);
     const [petitionPictureUrl, setPetitionPictureUrl] = React.useState<string>("");
+    const [openDialog, setOpenDialog] = React.useState(false);
     const navigate = useNavigate();
 
     React.useEffect(() => {
@@ -282,6 +286,22 @@ const EditPetition = () => {
 
     };
 
+    const deletePetition = () => {
+        axios.delete('http://localhost:4941/api/v1/petitions/' + petitionId, {headers: {'X-Authorization': userToken}})
+            .then((response) => {
+                setSnackboxMessage("Petition deleted successfully");
+                setSuccessSnackboxOpen(true);
+                setErrorSnackboxOpen(false);
+                navigate('/petitions');
+            })
+            .catch((error) => {
+                console.log(error);
+                setSnackboxMessage("Cannot delete a petition with active supporters");
+                setErrorSnackboxOpen(true);
+                setSuccessSnackboxOpen(false);
+            });
+    }
+
     return (<Container component="main" maxWidth="xs">
         <CssBaseline/>
         <Snackbar
@@ -464,11 +484,33 @@ const EditPetition = () => {
                         <Button
                             fullWidth
                             variant="contained"
-                            sx={{mt: 3, mb: 2}}
+                            sx={{mt: 1, mb: 1}}
                             type="submit"
                         >
                             Save Petition
                         </Button>
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            type="button"
+                            onClick={()=>setOpenDialog(true)}
+                            color="error"
+                            sx={{ mb: 1}}
+                        >
+                            Delete Petition
+                        </Button>
+                        
+                        <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+                            <DialogTitle>Confirm Delete</DialogTitle>
+                            <DialogContent>
+                                <Typography variant="body1">Are you sure you want to delete this
+                                    petition?</Typography>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button variant="outlined" onClick={() => setOpenDialog(false)}>Cancel</Button>
+                                <Button variant="outlined" onClick={deletePetition} color="error">Delete</Button>
+                            </DialogActions>
+                        </Dialog>
                     </Grid>
                 </Grid>
             </Grid>
