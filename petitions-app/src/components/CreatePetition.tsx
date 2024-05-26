@@ -5,6 +5,7 @@ import {
     Box,
     Button,
     CssBaseline,
+    Dialog,
     FormControl,
     Grid, IconButton,
     InputLabel,
@@ -26,7 +27,7 @@ const CreatePetition = () => {
     const [categoryIdError, setCategoryIdError] = React.useState(false);
     const [supportTiersError, setSupportTiersError] = React.useState(false);
     const [imageError, setImageError] = React.useState(false);
-    const [supportTiers, setSupportTiers] = React.useState<PostSupportTier[]>([{title: '', description: '', cost: 0}]);
+    const [supportTiers, setSupportTiers] = React.useState<PostSupportTier[]>([]);
     const [categories, setCategories] = React.useState<Array<Category>>([]);
     const [selectedCategory, setSelectedCategory] = React.useState<string>("1");
     const [errorFlag, setErrorFlag] = React.useState(false);
@@ -36,6 +37,7 @@ const CreatePetition = () => {
     const navigate = useNavigate();
     const [selectedFile, setSelectedFile] = React.useState<File>()
     const [preview, setPreview] = React.useState<string>("")
+    const [openDialogs, setOpenDialogs] = React.useState<boolean[]>([]);
 
 
 
@@ -78,8 +80,28 @@ const CreatePetition = () => {
 
     const addSupportTier = () => {
         if (supportTiers.length < 3) {
-            setSupportTiers([...supportTiers, {title: '', description: '', cost: 0}]);
+            setSupportTiers([...supportTiers, { title: '', description: '', cost: 0 }]);
+            setOpenDialogs([...openDialogs, true]);
         }
+    };
+
+    const toggleDialog = (index: number) => {
+        const newOpenDialogs = [...openDialogs];
+        newOpenDialogs[index] = !newOpenDialogs[index];
+        setOpenDialogs(newOpenDialogs);
+    
+        if (!newOpenDialogs[index] && !supportTiers[index].title && !supportTiers[index].description && supportTiers[index].cost === 0) {
+            const newSupportTiers = supportTiers.filter((_, i) => i !== index);
+            setSupportTiers(newSupportTiers);
+            setOpenDialogs(newOpenDialogs.filter((_, i) => i !== index));
+        }
+    };
+
+    const deleteSupportTier = (index: number) => {
+        const newSupportTiers = supportTiers.filter((_, i) => i !== index);
+        setSupportTiers(newSupportTiers);
+        const newOpenDialogs = openDialogs.filter((_, i) => i !== index);
+        setOpenDialogs(newOpenDialogs);
     };
 
     const submit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -249,6 +271,7 @@ const CreatePetition = () => {
                                 autoFocus
                                 error={titleError}
                                 helperText={titleError ? "Title is required" : ""}
+                                
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -283,45 +306,66 @@ const CreatePetition = () => {
                                 </Select>
                             </FormControl>
                         </Grid>
-                        {supportTiers.map((tier, index) => (
-                            <Grid item key={index} xs={12}>
-                                <TextField
-                                    label="Support Tier Title"
-                                    variant="outlined"
-                                    fullWidth
-                                    value={tier.title}
-                                    onChange={e => handleSupportTierChange(index, 'title', e.target.value)}
-                                    sx={{marginBottom: 1}}
-                                />
-                                <TextField
-                                    label="Support Tier Description"
-                                    variant="outlined"
-                                    fullWidth
-                                    multiline
-                                    rows={2}
-                                    value={tier.description}
-                                    onChange={e => handleSupportTierChange(index, 'description', e.target.value)}
-                                    sx={{marginBottom: 1}}
-                                />
-                                <TextField
-                                    label="Support Tier Cost"
-                                    variant="outlined"
-                                    fullWidth
-                                    type="number"
-                                    value={tier.cost}
-                                    onChange={e => handleSupportTierChange(index, 'cost', Number(e.target.value))}
-                                    sx={{marginBottom: 1}}
-                                />
-                            </Grid>
-                        ))}
+                        <Grid container spacing={2} sx={{ display: "flex", justifyContent: "center", marginTop: "10px" }}>
+    {supportTiers.map((tier, index) => (
+        <Grid item key={index}>
+            <Button onClick={() => toggleDialog(index)} variant="outlined">
+                Edit {tier.title ? tier.title : "Support Tier"}
+            </Button>
+            <Dialog open={openDialogs[index]} onClose={() => toggleDialog(index)} fullWidth={true} maxWidth={"md"}>
+                <form onSubmit={(e) => e.preventDefault()} style={{ margin: "20px" }}>
+                    <Box p={2}>
+                        <TextField
+                            label="Support Tier Title"
+                            variant="outlined"
+                            fullWidth
+                            value={tier.title}
+                            onChange={(e) => handleSupportTierChange(index, 'title', e.target.value)}
+                            sx={{ marginBottom: 2 }}
+                        />
+                        <TextField
+                            label="Support Tier Description"
+                            variant="outlined"
+                            fullWidth
+                            multiline
+                            rows={4}
+                            value={tier.description}
+                            onChange={(e) => handleSupportTierChange(index, 'description', e.target.value)}
+                            sx={{ marginBottom: 2 }}
+                        />
+                        <TextField
+                            label="Support Tier Cost"
+                            variant="outlined"
+                            fullWidth
+                            type="number"
+                            value={tier.cost}
+                            onChange={(e) => handleSupportTierChange(index, 'cost', Number(e.target.value))}
+                            sx={{ marginBottom: 2 }}
+                        />
+                    </Box>
+                    <Box sx={{ display: "flex" }} p={2}>
+                        <Button variant="outlined" color={"error"} onClick={() => deleteSupportTier(index)}>
+                            Delete
+                        </Button>
+                        <Button variant="outlined" onClick={() => toggleDialog(index)}>
+                            Save
+                        </Button>
+                    </Box>
+                </form>
+            </Dialog>
+        </Grid>
+    ))}
+</Grid>
                         {supportTiers.length < 3 && (
                             <Grid item xs={12}>
-                                <Button variant="outlined" onClick={addSupportTier}>
+                                <Button variant="contained" onClick={addSupportTier}>
                                     Add Support Tier
                                 </Button>
                             </Grid>
                         )}
-
+                        <Typography variant="overline" color="error" align="left">
+                            {supportTiersError ? "At least one support tier is required" : ""}
+                        </Typography>
                         <Button
                             fullWidth
                             variant="contained"

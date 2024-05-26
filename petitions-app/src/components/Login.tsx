@@ -7,6 +7,7 @@ import {
     CssBaseline,
     FormControlLabel,
     Grid,
+    IconButton,
     TextField,
     Typography
 } from "@mui/material";
@@ -14,6 +15,7 @@ import {useUserStore} from "../store";
 import Box from "@mui/material/Box";
 import {Link, useNavigate} from "react-router-dom";
 import axios from "axios";
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const Login = () => {
     const userId = useUserStore(state => state.userId)
@@ -21,6 +23,7 @@ const Login = () => {
     const setUserToken = useUserStore(state => state.setUserToken)
     const navigate = useNavigate()
     const [errorFlag, setErrorFlag] = React.useState(false)
+    const [showPassword, setShowPassword] = React.useState(false);
     React.useEffect(() => {
         axios.get('http://localhost:4941/api/v1/users/' + userId).then((response) => {
             navigate('/petitions')
@@ -69,16 +72,26 @@ const Login = () => {
                             error={errorFlag}
                         />
                         <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="Password"
-                            type="password"
-                            id="password"
-                            autoComplete="current-password"
-                            error={errorFlag}
-                        />
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type={showPassword ? 'text' : 'password'}
+                        id="password"
+                        error={errorFlag}
+                        autoComplete="new-password"
+                        InputProps={{
+                            endAdornment: (
+                                <IconButton
+                                aria-label="toggle password visibility"
+                                onClick={()=> setShowPassword(!showPassword)}
+                                edge="end"
+                                >
+                                {showPassword ? <Visibility /> : <VisibilityOff />}
+                                </IconButton>
+                            ),
+                            }}
+                    />
                         <Typography variant="overline" color="error" align="left">
                             {errorFlag ? "Invalid email or password" : ""}
                         </Typography>

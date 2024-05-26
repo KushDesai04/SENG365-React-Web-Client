@@ -125,7 +125,7 @@ const SupportTierCard: React.FC<ISupportTierProps> = (props) => {
                                             {supporter.supporterFirstName[0] + supporter.supporterLastName[0]}
                                         </Avatar>}
                                         title={`${supporter.supporterFirstName} ${supporter.supporterLastName}`}
-                                        subheader={`Supporting Since: ${dayjs(supporter.timestamp).format("hh:mm DD/MM/YYYY")}`} />
+                                        subheader={`Supporting Since: ${dayjs(supporter.timestamp).format("HH:mm DD/MM/YYYY")}`} />
                                     <CardContent sx={{ paddingBottom: 0 }}>
                                         <Typography>{supporter.message}</Typography>
                                     </CardContent>

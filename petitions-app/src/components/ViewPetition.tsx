@@ -49,6 +49,7 @@ const ViewPetition = () => {
     const [tierSupport, setTierSupport] = useState<SupportTier | null>(null);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [errorFlag, setErrorFlag] = useState<boolean>(false);
+    const [successFlag, setSuccessFlag] = useState<boolean>(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -141,14 +142,24 @@ const ViewPetition = () => {
                     axios.get(`http://localhost:4941/api/v1/petitions/${petitionId}`)
                         .then((response) => {
                             setSupportDialog(false);
-                            setMessage("")
+                            setMessage("")  
+                            setSuccessFlag(true)
+                            setErrorFlag(false)
+                            setErrorMessage("Successfully supported petition")
                         })
                         .catch((error) => {
                             console.error(error);
                         });
                 })
                 .catch((error) => {
-                    setErrorMessage(error.response.statusText)
+                    if (error.response.statusText.includes("Duplicate")) {
+                        setErrorMessage("You are already supporting this petition")
+                    } else if (error.response.statusText.includes("your own petition")) {
+                        setErrorMessage("You cannot support your own petition")
+                    } else {
+                        setErrorMessage(error.response.statusText)
+                    }
+                    
                     setErrorFlag(true)
                 });
         }
@@ -172,12 +183,12 @@ const ViewPetition = () => {
     return (
         <>
             <Snackbar
-                open={errorFlag}
+                open={errorFlag || successFlag}
                 autoHideDuration={5000}
-                onClose={() => setErrorFlag(false)}
+                onClose={() => {setErrorFlag(false); setSuccessFlag(false)}}
             >
                 <Alert
-                    severity="error"
+                    severity={errorFlag ? "error" : "success"}
                     variant="filled"
                     sx={{ width: '100%' }}
                 >
@@ -194,8 +205,8 @@ const ViewPetition = () => {
                     <Card sx={CardStyles}>
                         <CardHeader sx={{ height: "50px" }}
                             title={supportTier.title} />
-                        <CardContent sx={{ height: "100px" }}>
-                            <Chip label={"$ " + supportTier.cost} />
+                        <CardContent sx={{ height: "150px" }}>
+                            <Chip label={"$ " + supportTier.cost} sx={{backgroundColor:"lightgreen"}}/>
                             <Typography variant="body2" color="text.primary" sx={{ margin: "5% !important" }}>
                                 {supportTier.description}
                             </Typography>
@@ -253,7 +264,7 @@ const ViewPetition = () => {
                                                         {supporter.message || 'No message'}
                                                     </Typography>
                                                     <br />
-                                                    {`Supporting Since: ${dayjs(supporter.timestamp).format('hh:mm DD/MM/YYYY')}`}
+                                                    {`Supporting Since: ${dayjs(supporter.timestamp).format('HH:mm DD/MM/YYYY')}`}
                                                 </>
                                             }
                                         />

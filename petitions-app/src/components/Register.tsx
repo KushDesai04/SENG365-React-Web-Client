@@ -8,10 +8,12 @@ import {useUserStore} from "../store";
 import {wait} from "@testing-library/user-event/dist/utils";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const Register = () => {
     const setUserId = useUserStore(state => state.setUserId)
     const setUserToken = useUserStore(state => state.setUserToken)
+    const userToken = useUserStore(state => state.userToken)
     const [firstNameError, setFirstNameError] = React.useState(false)
     const [lastNameError, setLastNameError] = React.useState(false)
     const [emailError, setEmailError] = React.useState(false)
@@ -22,10 +24,15 @@ const Register = () => {
     const [image, setImage] = React.useState<File | null>(null);
     const [selectedFile, setSelectedFile] = React.useState<File>()
     const [preview, setPreview] = React.useState<string>("")
+    const [showPassword, setShowPassword] = React.useState(false);
     const navigate = useNavigate();
 
 
     React.useEffect(() => {
+        if (userToken) {
+            navigate('/petitions')
+        }
+        
         if (!selectedFile) {
             setPreview("")
             return
@@ -216,10 +223,21 @@ const Register = () => {
                                 fullWidth
                                 name="password"
                                 label="Password"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 id="password"
                                 autoComplete="new-password"
                                 error={passwordError}
+                                InputProps={{
+                                    endAdornment: (
+                                      <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={()=> setShowPassword(!showPassword)}
+                                        edge="end"
+                                      >
+                                        {showPassword ? <Visibility /> : <VisibilityOff />}
+                                      </IconButton>
+                                    ),
+                                  }}
                             />
                             <Typography variant="overline" color="error" align="left">
                                 {passwordError ? "Password must be at least 6 characters long" : ""}
@@ -253,20 +271,6 @@ const Register = () => {
                                     <DeleteIcon style={{color: 'white'}}/>
                                 </IconButton>
                             </OverlayDeleteIconContainer>)}
-                    </Box>
-                    <Box>
-                        <label htmlFor="image-upload">
-                            <input
-                                id="image-upload"
-                                name="image-upload"
-                                type="file"
-                                style={{display: 'none'}}
-                                onChange={(event) => chooseImage(event.target.files ? event.target.files[0] : null)}
-                            />
-                            <IconButton component="span">
-                                <EditIcon sx={{color: 'white'}}/>
-                            </IconButton>
-                        </label>
                     </Box>
 
                     <Button

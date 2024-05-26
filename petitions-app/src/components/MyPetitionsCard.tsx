@@ -111,7 +111,7 @@ function PetitionsCard(props: IPetitionProps) {
                                     {petition.ownerFirstName[0] + petition.ownerLastName[0]}
                                 </Avatar>}
                                 title={petition.ownerFirstName + " " + petition.ownerLastName}
-                                subheader={"Created: " + dayjs(petition.creationDate).format("hh:mm DD/MM/YYYY")}/>
+                                subheader={"Created: " + dayjs(petition.creationDate).format("HH:mm DD/MM/YYYY")}/>
                     <CardMedia
                         component="img"
                         height="200"

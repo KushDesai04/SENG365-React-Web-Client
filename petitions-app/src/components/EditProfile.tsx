@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useUserStore } from '../store';
-import { Alert, Avatar, Box, Button, Grid, IconButton, Paper, Snackbar, styled, TextField } from '@mui/material';
+import { Alert, Avatar, Box, Button, Grid, IconButton, Paper, Snackbar, styled, TextField, Typography } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const EditProfile = () => {
     const userId = useUserStore(state => state.userId);
@@ -13,6 +14,16 @@ const EditProfile = () => {
     const navigate = useNavigate();
     const [profilePictureUrl, setProfilePictureUrl] = React.useState<string>('');
     const [invalidImageError, setInvalidImageError] = React.useState<boolean>(false);
+    const [firstNameError, setFirstNameError] = React.useState(false)
+    const [lastNameError, setLastNameError] = React.useState(false)
+    const [emailError, setEmailError] = React.useState(false)
+    const [emailInUseError, setEmailInUseError] = React.useState(false)
+    const [passwordError, setPasswordError] = React.useState(false)
+    const [invalidCurrentPassword, setInvalidCurrentPassword] = React.useState(false)
+    const [identicalPasswords, setIdenticalPasswords] = React.useState(false)
+    const [samePassword, setSamePassword] = React.useState(false)
+    const [showPassword, setShowPassword] = React.useState(false)
+    const [showNewPassword, setShowNewPassword] = React.useState(false)
     const [error, setError] = useState<string>('');
     const [open, setOpen] = useState<boolean>(false);
 
@@ -152,8 +163,39 @@ const EditProfile = () => {
                 navigate('/profile');
             })
             .catch((error) => {
-                setError(error.response.data.message || 'An error occurred');
-                setOpen(true);
+                const errorMessage = error.response.statusText.split('/')[1]
+                const errorType = error.response.status
+                setFirstNameError(false)
+                setLastNameError(false)
+                setEmailError(false)
+                setPasswordError(false)
+                setEmailInUseError(false)
+                setIdenticalPasswords(false)
+                setInvalidCurrentPassword(false)
+                setSamePassword(false)
+                if (errorType === 403) {
+                    if (error.response.statusText.includes('email')) {
+                        setEmailInUseError(true)
+                    } else if (error.response.statusText.includes('password')) {
+                        setSamePassword(true)
+                    }
+                } else if (errorType === 401) {
+                    setInvalidCurrentPassword(true)
+                } else if (errorType === 401) {
+                    setInvalidCurrentPassword(true)
+                } else {
+                    if (errorMessage.includes('firstName')) {
+                        setFirstNameError(true)
+                    } else if (errorMessage.includes('lastName')) {
+                        setLastNameError(true)
+                    } else if (errorMessage.includes('email')) {
+                        setEmailError(true)
+                    } else if (errorMessage.includes('password') || errorMessage.includes('6 characters')) {
+                        setPasswordError(true)
+                    } else if (errorMessage.includes('identical')) {
+                        setIdenticalPasswords(true)
+                    }
+                }
             });
     };
 
@@ -204,7 +246,11 @@ const EditProfile = () => {
                                             name="firstName"
                                             label="First Name"
                                             defaultValue={user.firstName}
+                                            error={firstNameError}
                                         />
+                                        <Typography variant="overline" color="error" align="left">
+                                            {firstNameError ? "First name is required" : ""}
+                                        </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
                                         <TextField
@@ -214,7 +260,11 @@ const EditProfile = () => {
                                             name="lastName"
                                             label="Last Name"
                                             defaultValue={user.lastName}
+                                            error={lastNameError}
                                         />
+                                        <Typography variant="overline" color="error" align="left">
+                                            {lastNameError ? "Last name is required" : ""}
+                                        </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
                                         <TextField
@@ -224,7 +274,12 @@ const EditProfile = () => {
                                             name="email"
                                             label="Email"
                                             defaultValue={user.email}
+                                            error={emailError || emailInUseError}
                                         />
+                                        <Typography variant="overline" color="error" align="left">
+                                            {emailError ? "Email must be in the format: jane@doe.com" : ""}
+                                            {emailInUseError ? "Email is already in use" : ""}
+                                        </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
                                         <TextField
@@ -232,8 +287,25 @@ const EditProfile = () => {
                                             id="currentPassword"
                                             name="currentPassword"
                                             label="Current Password"
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            error={passwordError || invalidCurrentPassword || samePassword}
+                                            InputProps={{
+                                                endAdornment: (
+                                                  <IconButton
+                                                    aria-label="toggle password visibility"
+                                                    onClick={()=> setShowPassword(!showPassword)}
+                                                    edge="end"
+                                                  >
+                                                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                                                  </IconButton>
+                                                ),
+                                              }}
                                         />
+                                        <Typography variant="overline" color="error" align="left">
+                                            {passwordError ? "Password must be at least 6 characters long" : ""}
+                                            {invalidCurrentPassword ? "Invalid current password" : ""}
+                                            {samePassword ? "New password must be different from current password" : ""}
+                                        </Typography>
                                     </Grid>
                                     <Grid item xs={12}>
                                         <TextField
@@ -241,8 +313,25 @@ const EditProfile = () => {
                                             id="newPassword"
                                             name="newPassword"
                                             label="New Password"
-                                            type="password"
+                                            type={showNewPassword ? 'text' : 'password'}
+                                            error={passwordError || identicalPasswords}
+                                            InputProps={{
+                                                endAdornment: (
+                                                  <IconButton
+                                                    aria-label="toggle password visibility"
+                                                    onClick={()=> setShowNewPassword(!showNewPassword)}
+                                                    edge="end"
+                                                  >
+                                                    {showNewPassword ? <Visibility /> : <VisibilityOff />}
+                                                  </IconButton>
+                                                ),
+                                              }}
                                         />
+                                        <Typography variant="overline" color="error" align="left">
+                                            {passwordError ? "Password must be at least 6 characters long" : ""}
+                                            {identicalPasswords ? "New password must be different from current password" : ""}
+                                        </Typography>
+
                                     </Grid>
                                     <Grid item xs={12}>
                                         <Button variant="contained" sx={{ marginTop: 2 }} type="submit">

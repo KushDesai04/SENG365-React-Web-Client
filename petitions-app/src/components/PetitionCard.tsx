@@ -47,13 +47,13 @@ function PetitionCard(props: IPetitionProps) {
                         {petition.ownerFirstName[0] + petition.ownerLastName[0]}
                     </Avatar>}
                     title={petition.ownerFirstName + " " + petition.ownerLastName}
-                    subheader={"Created: " + dayjs(petition.creationDate).format("hh:mm DD/MM/YYYY")} />
+                    subheader={"Created: " + dayjs(petition.creationDate).format("HH:mm DD/MM/YYYY")} />
                 <CardMedia
                     component="img"
                     sx={{ objectFit: "cover", maxHeight:"50vh"}}
                     image={"http://localhost:4941/api/v1/petitions/" + petition.petitionId + "/image"}
                     alt="Petition hero" />
-                <CardContent sx={{ height: "200px"}}>
+                <CardContent sx={{ height: "250px"}}>
                     <Typography variant="h5">
                         {petition.title}
                     </Typography>
