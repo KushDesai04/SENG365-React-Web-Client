@@ -338,7 +338,7 @@ const EditPetition = () => {
                             </OverlayIconContainer>
                         </Box>
                         {imageError && (
-                            <><br/><Typography variant="overline"color="error">Only PNG, JPEG, and GIF files are allowed</Typography></>
+                            <><br/><Typography variant="overline"color="error">Image must be a PNG, JPEG, or GIF.</Typography></>
                         )}
                     </Grid>
                     {petition && (<>

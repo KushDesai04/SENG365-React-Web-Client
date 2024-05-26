@@ -248,16 +248,12 @@ const CreatePetition = () => {
                                         />
                                     </Button>
                                     <br/>
-                                    <Typography variant="overline" color="error" align="left">
-                                        {imageError ? "Image must be of type .jpg/.png/.gif" : ""}
-                                    </Typography>
                                 </Box>
                             </Grid>}
-
+                            <Typography variant="overline" color="error" align="left">
+                                {imageError ? "Image must be a PNG, JPEG, or GIF." : ""}
+                            </Typography>
                         </Box>
-                        {imageError && (
-                            <><br/><Typography variant="overline"color="error">Only PNG, JPEG, and GIF files are allowed</Typography></>
-                        )}
                     </Grid>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
@@ -269,10 +265,11 @@ const CreatePetition = () => {
                                 id="title"
                                 label="Petition Title"
                                 autoFocus
-                                error={titleError}
-                                helperText={titleError ? "Title is required" : ""}
-                                
+                                error={titleError}                                
                             />
+                            <Typography variant="overline" color="error" align="left">
+                                {titleError ? "Title is required" : ""}
+                            </Typography>
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
@@ -284,8 +281,10 @@ const CreatePetition = () => {
                                 multiline
                                 rows={4}
                                 error={descriptionError}
-                                helperText={descriptionError ? "Description is required" : ""}
                             />
+                            <Typography variant="overline" color="error" align="left">
+                                {descriptionError ? "Description is required" : ""}
+                            </Typography>
                         </Grid>
                         <Grid item xs={12}>
                             <FormControl sx={{width: "100%"}}>

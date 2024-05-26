@@ -170,7 +170,7 @@ const Profile = () => {
                     variant="filled"
                     sx={{width: '100%'}}
                 >
-                    Image type not supported. Please upload a PNG, JPEG, or GIF file.
+                    Image must be a PNG, JPEG, or GIF.
                 </Alert>
             </Snackbar>
         </>)

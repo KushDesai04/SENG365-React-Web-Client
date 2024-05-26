@@ -350,7 +350,7 @@ const EditProfile = () => {
                 onClose={handleCloseInvalidImageError}
             >
                 <Alert severity="error" variant="filled" sx={{ width: '100%' }}>
-                    Image type not supported. Please upload a PNG, JPEG, or GIF file.
+                    Image must be a PNG, JPEG, or GIF.
                 </Alert>
             </Snackbar>
             <Snackbar open={open} autoHideDuration={6000} onClose={handleCloseSnackbar}>

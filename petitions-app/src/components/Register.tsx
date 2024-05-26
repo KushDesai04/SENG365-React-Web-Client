@@ -271,6 +271,9 @@ const Register = () => {
                                     <DeleteIcon style={{color: 'white'}}/>
                                 </IconButton>
                             </OverlayDeleteIconContainer>)}
+                        <Typography variant="overline" color="error" align="left">
+                            {imageError ? "Image must be a PNG, JPEG, or GIF." : ""}
+                        </Typography>
                     </Box>
 
                     <Button
